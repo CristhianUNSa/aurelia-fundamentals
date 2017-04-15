@@ -147,6 +147,12 @@
             "resources": [
               "css/bootstrap.css"
             ]
+          },
+          {
+            "name": "moment",
+            "main": "./min/moment.min",
+            "path": "../node_modules/moment",
+            "resources": []
           }
         ]
       }
