@@ -1,7 +1,12 @@
 import environment from './environment';
 import { ViewLocator } from 'aurelia-framework';
+import {Plugin1} from './plugin1';
+import {Plugin2} from './plugin2';
 
 export function configure(aurelia) {
+  aurelia.use.transient('SuperPlugIn', Plugin1);
+  aurelia.use.transient('SuperPlugIn', Plugin2);
+
   aurelia.use
     .standardConfiguration()
     .feature('resources');
