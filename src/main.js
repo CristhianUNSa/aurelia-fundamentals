@@ -19,11 +19,11 @@ export function configure(aurelia) {
     aurelia.use.plugin('aurelia-testing');
   }
 
-  ViewLocator.prototype.convertOriginToViewUrl = (origin) => {
-    let moduleId = origin.moduleId;
-    let id = (moduleId.endsWith('.js') || moduleId.endsWith('.ts')) ? moduleId.substring(0, moduleId.length - 3) : moduleId;
-    return id.replace('viewmodels', 'views') + '.html';
-  };
+  // ViewLocator.prototype.convertOriginToViewUrl = (origin) => {
+  //   let moduleId = origin.moduleId;
+  //   let id = (moduleId.endsWith('.js') || moduleId.endsWith('.ts')) ? moduleId.substring(0, moduleId.length - 3) : moduleId;
+  //   return id.replace('viewmodels', 'views') + '.html';
+  // };
 
-  aurelia.start().then(() => aurelia.setRoot('viewmodels/app'));
+  aurelia.start().then(() => aurelia.setRoot('app'));
 }

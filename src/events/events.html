@@ -1,6 +1,6 @@
 <template>
   <div repeat.for="event of events">
-    <compose model.bind="event" view-model="viewmodels/event"></compose>
+    <compose model.bind="event" view="./event.html"></compose>
   </div>
   <button type="button" click.trigger="createAndUseLazy()">Use Lazy</button>
 </template>
