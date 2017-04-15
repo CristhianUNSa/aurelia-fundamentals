@@ -1,4 +1,5 @@
 import environment from './environment';
+import { ViewLocator } from 'aurelia-framework';
 
 export function configure(aurelia) {
   aurelia.use
@@ -13,5 +14,11 @@ export function configure(aurelia) {
     aurelia.use.plugin('aurelia-testing');
   }
 
-  aurelia.start().then(() => aurelia.setRoot());
+  ViewLocator.prototype.convertOriginToViewUrl = (origin) => {
+    let moduleId = origin.moduleId;
+    let id = (moduleId.endsWith('.js') || moduleId.endsWith('.ts')) ? moduleId.substring(0, moduleId.length - 3) : moduleId;
+    return id.replace('viewmodels', 'views') + '.html';
+  };
+
+  aurelia.start().then(() => aurelia.setRoot('viewmodels/app'));
 }
