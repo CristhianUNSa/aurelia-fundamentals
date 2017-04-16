@@ -181,9 +181,22 @@ define('discussion/discussion',["exports"], function (exports) {
     }
   }
 
-  var Discussion = exports.Discussion = function Discussion() {
-    _classCallCheck(this, Discussion);
-  };
+  var Discussion = exports.Discussion = function () {
+    function Discussion() {
+      _classCallCheck(this, Discussion);
+    }
+
+    Discussion.prototype.activate = function activate() {
+      var promise = new Promise(function (resolve, reject) {
+        setTimeout(function (_) {
+          return resolve();
+        }, 3000);
+      });
+      return promise;
+    };
+
+    return Discussion;
+  }();
 });
 define('events/eventDetail',['exports', 'aurelia-framework', 'services/dataRepository'], function (exports, _aureliaFramework, _dataRepository) {
   'use strict';
@@ -288,18 +301,22 @@ define('jobs/jobs',["exports"], function (exports) {
     }
   }
 
-  var Jobs = exports.Jobs = function Jobs() {
-    _classCallCheck(this, Jobs);
-  };
-});
-define('resources/index',["exports"], function (exports) {
-  "use strict";
+  var Jobs = exports.Jobs = function () {
+    function Jobs() {
+      _classCallCheck(this, Jobs);
+    }
 
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-  exports.configure = configure;
-  function configure(config) {}
+    Jobs.prototype.canActivate = function canActivate(params, routeConfig) {
+      var promise = new Promise(function (resolve, reject) {
+        setTimeout(function (_) {
+          return resolve(false);
+        }, 3000);
+      });
+      return promise;
+    };
+
+    return Jobs;
+  }();
 });
 define('services/dataRepository',['exports', './eventsData', 'moment'], function (exports, _eventsData, _moment) {
   'use strict';
@@ -763,8 +780,17 @@ define('sponsors/sponsors',["exports"], function (exports) {
         _classCallCheck(this, Sponsors);
     };
 });
-define('text!app.html', ['module'], function(module) { module.exports = "<template><require from=\"bootstrap/css/bootstrap.css\"></require><nav class=\"navbar navbar-default\"><div class=\"container-fluid\"><div class=\"navbar-header\"><button type=\"button\" class=\"navbar-toggle collapsed\" data-toggle=\"collapse\" data-target=\"#bs-example-navbar-collapse-1\" aria-expanded=\"false\"><span class=\"sr-only\">Toggle navigation</span> <span class=\"icon-bar\"></span> <span class=\"icon-bar\"></span> <span class=\"icon-bar\"></span></button> <a class=\"navbar-brand\" href=\"#\">Aurelia Fundamentals</a></div><div class=\"collapse navbar-collapse\" id=\"bs-example-navbar-collapse-1\"><ul class=\"nav navbar-nav\"><li repeat.for=\"route of router.navigation\" class=\"${route.isActive ? 'active' : ''}\"><a data-toggle=\"collapse\" data-target=\"#bs-example-navbar-collapse-1.in\" href.bind=\"route.href\">${route.title}</a></li></ul></div></div></nav><div class=\"container-fluid\"><div class=\"col-xs-10\"><router-view></router-view></div><div class=\"col-xs-2\"><compose view-model=\"sponsors/sponsors\"></compose></div></div></template>"; });
-define('text!discussion/discussion.html', ['module'], function(module) { module.exports = "<template>Discussion</template>"; });
+define('resources/index',["exports"], function (exports) {
+  "use strict";
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.configure = configure;
+  function configure(config) {}
+});
+define('text!app.html', ['module'], function(module) { module.exports = "<template><require from=\"bootstrap/css/bootstrap.css\"></require><nav class=\"navbar navbar-default\"><div class=\"container-fluid\"><div class=\"navbar-header\"><button type=\"button\" class=\"navbar-toggle collapsed\" data-toggle=\"collapse\" data-target=\"#bs-example-navbar-collapse-1\" aria-expanded=\"false\"><span class=\"sr-only\">Toggle navigation</span> <span class=\"icon-bar\"></span> <span class=\"icon-bar\"></span> <span class=\"icon-bar\"></span></button> <a class=\"navbar-brand\" href=\"#\">Aurelia Fundamentals</a></div><div class=\"collapse navbar-collapse\" id=\"bs-example-navbar-collapse-1\"><ul class=\"nav navbar-nav\"><li repeat.for=\"route of router.navigation\" class=\"${route.isActive ? 'active' : ''}\"><a data-toggle=\"collapse\" data-target=\"#bs-example-navbar-collapse-1.in\" href.bind=\"route.href\">${route.title}</a></li></ul><ul class=\"nav navbar-nav navbar-right\"><li><i class=\"fa fa-cog fa-spin fa-3x\" style=\"margin:0 auto\" if.bind=\"router.isNavigating\"></i></li></ul></div></div></nav><div class=\"container-fluid\"><div class=\"col-xs-10\"><router-view></router-view></div><div class=\"col-xs-2\"><compose view-model=\"sponsors/sponsors\"></compose></div></div></template>"; });
+define('text!discussion/discussion.html', ['module'], function(module) { module.exports = "<template></template>"; });
 define('text!events/event.html', ['module'], function(module) { module.exports = "<template><div class=\"bg-success rbox\"><a href.bind=\"event.detailUrl\">${event.id} : ${event.title}</a></div></template>"; });
 define('text!events/eventDetail.html', ['module'], function(module) { module.exports = "<template><div class=\"row\"><div class=\"col-md-1\"><img src=\"images/speakers/${event.image}\" style=\"width:100%;max-width:200px\"></div><div class=\"col-md-11\"><h3>${event.title}</h3><h5>${event.dateTime}</h5></div></div><div class=\"row\"><div class=\"col-m-12\">${event.description}</div></div></template>"; });
 define('text!events/events.html', ['module'], function(module) { module.exports = "<template><div repeat.for=\"event of events\"><compose model.bind=\"event\" view=\"./event.html\"></compose></div><button type=\"button\" click.trigger=\"goToDiscussion()\">Go to discussion</button></template>"; });

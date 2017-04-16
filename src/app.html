@@ -21,6 +21,11 @@
               href.bind="route.href">${route.title}</a>
           </li>
         </ul>
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+            <i class="fa fa-cog fa-spin fa-3x" style="margin: 0 auto;" if.bind="router.isNavigating"></i>
+          </li>
+        </ul>
       </div><!-- /.navbar-collapse -->
     </div><!-- /.container-fluid -->
   </nav>
