@@ -114,7 +114,7 @@ define('main',['exports', './environment', 'aurelia-framework', './plugin1', './
     }
 
     aurelia.start().then(function () {
-      return aurelia.setRoot('app');
+      return aurelia.setRoot('shell');
     });
   }
 });
@@ -168,8 +168,8 @@ define('plugin2',['exports'], function (exports) {
     return Plugin2;
   }();
 });
-define('discussion/discussion',["exports"], function (exports) {
-  "use strict";
+define('discussion/discussion',['exports'], function (exports) {
+  'use strict';
 
   Object.defineProperty(exports, "__esModule", {
     value: true
@@ -181,18 +181,38 @@ define('discussion/discussion',["exports"], function (exports) {
     }
   }
 
+  function getDiscussionInput() {
+    return '';
+  }
+
+  function cloneObject(obj) {
+    return JSON.parse(JSON.stringify(obj));
+  }
+
   var Discussion = exports.Discussion = function () {
     function Discussion() {
       _classCallCheck(this, Discussion);
     }
 
     Discussion.prototype.activate = function activate() {
-      var promise = new Promise(function (resolve, reject) {
-        setTimeout(function (_) {
-          return resolve();
-        }, 3000);
-      });
-      return promise;
+      this.discussionInput = getDiscussionInput();
+      this.originalInput = cloneObject(this.discussionInput);
+    };
+
+    Discussion.prototype.save = function save() {
+      this.originalInput = cloneObject(this.discussionInput);
+    };
+
+    Discussion.prototype.canDeactivate = function canDeactivate() {
+      if (JSON.stringify(cloneObject(this.discussionInput)) !== JSON.stringify(this.originalInput)) {
+        if (confirm('Unsaved data, are you sure you want to navigate away?')) {
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        return true;
+      }
     };
 
     return Discussion;
@@ -228,7 +248,7 @@ define('events/eventDetail',['exports', 'aurelia-framework', 'services/dataRepos
     return EventDetail;
   }()) || _class);
 });
-define('events/events',['exports', './../services/dataRepository', 'aurelia-framework', './../im-lazy', 'aurelia-router'], function (exports, _dataRepository, _aureliaFramework, _imLazy, _aureliaRouter) {
+define('events/events',['exports', './../services/dataRepository', 'aurelia-framework', 'aurelia-router'], function (exports, _dataRepository, _aureliaFramework, _aureliaRouter) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
@@ -244,17 +264,12 @@ define('events/events',['exports', './../services/dataRepository', 'aurelia-fram
 
   var _dec, _class;
 
-  var Events = exports.Events = (_dec = (0, _aureliaFramework.inject)(_dataRepository.DataRepository, _aureliaRouter.Router, _aureliaFramework.Lazy.of(_imLazy.ImLazy), _aureliaFramework.All.of('SuperPlugIn')), _dec(_class = function () {
-    function Events(dataRepository, router, lazyOfImLazy, plugins) {
+  var Events = exports.Events = (_dec = (0, _aureliaFramework.inject)(_dataRepository.DataRepository, _aureliaRouter.Router), _dec(_class = function () {
+    function Events(dataRepository, router) {
       _classCallCheck(this, Events);
 
       this.dataRepository = dataRepository;
       this.router = router;
-      this.lazyOfImLazy = lazyOfImLazy;
-
-      plugins.forEach(function (plugin) {
-        plugin.doPlugInStuff();
-      });
     }
 
     Events.prototype.activate = function activate(params) {
@@ -789,11 +804,39 @@ define('resources/index',["exports"], function (exports) {
   exports.configure = configure;
   function configure(config) {}
 });
+define('shell',['exports'], function (exports) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var App = exports.App = function () {
+    function App() {
+      _classCallCheck(this, App);
+    }
+
+    App.prototype.configureRouter = function configureRouter(config, router) {
+      this.router = router;
+      config.title = 'Aurelia Fundamentals';
+      config.map([{ route: ['', 'events'], moduleId: './events/events', name: 'Events', title: 'Events', nav: true }, { route: 'jobs', moduleId: './jobs/jobs', title: 'Jobs', nav: true }, { route: 'discussion', moduleId: './discussion/discussion', title: 'Discussion', nav: true }, { route: 'eventDetail/:eventId', moduleId: './events/eventDetail', name: 'eventDetail' }]);
+    };
+
+    return App;
+  }();
+});
 define('text!app.html', ['module'], function(module) { module.exports = "<template><require from=\"bootstrap/css/bootstrap.css\"></require><nav class=\"navbar navbar-default\"><div class=\"container-fluid\"><div class=\"navbar-header\"><button type=\"button\" class=\"navbar-toggle collapsed\" data-toggle=\"collapse\" data-target=\"#bs-example-navbar-collapse-1\" aria-expanded=\"false\"><span class=\"sr-only\">Toggle navigation</span> <span class=\"icon-bar\"></span> <span class=\"icon-bar\"></span> <span class=\"icon-bar\"></span></button> <a class=\"navbar-brand\" href=\"#\">Aurelia Fundamentals</a></div><div class=\"collapse navbar-collapse\" id=\"bs-example-navbar-collapse-1\"><ul class=\"nav navbar-nav\"><li repeat.for=\"route of router.navigation\" class=\"${route.isActive ? 'active' : ''}\"><a data-toggle=\"collapse\" data-target=\"#bs-example-navbar-collapse-1.in\" href.bind=\"route.href\">${route.title}</a></li></ul><ul class=\"nav navbar-nav navbar-right\"><li><i class=\"fa fa-cog fa-spin fa-3x\" style=\"margin:0 auto\" if.bind=\"router.isNavigating\"></i></li></ul></div></div></nav><div class=\"container-fluid\"><div class=\"col-xs-10\"><router-view></router-view></div><div class=\"col-xs-2\"><compose view-model=\"sponsors/sponsors\"></compose></div></div></template>"; });
-define('text!discussion/discussion.html', ['module'], function(module) { module.exports = "<template></template>"; });
+define('text!discussion/discussion.html', ['module'], function(module) { module.exports = "<template>Discussion input: <input type=\"text\" value.bind=\"discussionInput\"><br><button type=\"button\" click.delegate=\"save()\">Save</button></template>"; });
 define('text!events/event.html', ['module'], function(module) { module.exports = "<template><div class=\"bg-success rbox\"><a href.bind=\"event.detailUrl\">${event.id} : ${event.title}</a></div></template>"; });
 define('text!events/eventDetail.html', ['module'], function(module) { module.exports = "<template><div class=\"row\"><div class=\"col-md-1\"><img src=\"images/speakers/${event.image}\" style=\"width:100%;max-width:200px\"></div><div class=\"col-md-11\"><h3>${event.title}</h3><h5>${event.dateTime}</h5></div></div><div class=\"row\"><div class=\"col-m-12\">${event.description}</div></div></template>"; });
 define('text!events/events.html', ['module'], function(module) { module.exports = "<template><div repeat.for=\"event of events\"><compose model.bind=\"event\" view=\"./event.html\"></compose></div><button type=\"button\" click.trigger=\"goToDiscussion()\">Go to discussion</button></template>"; });
 define('text!jobs/jobs.html', ['module'], function(module) { module.exports = "<template>Jobs</template>"; });
 define('text!sponsors/sponsors.html', ['module'], function(module) { module.exports = "<template>Sponsors</template>"; });
+define('text!shell.html', ['module'], function(module) { module.exports = "<template><require from=\"bootstrap/css/bootstrap.css\"></require><nav class=\"navbar navbar-default\"><div class=\"container-fluid\"><div class=\"navbar-header\"><button type=\"button\" class=\"navbar-toggle collapsed\" data-toggle=\"collapse\" data-target=\"#bs-example-navbar-collapse-1\" aria-expanded=\"false\"><span class=\"sr-only\">Toggle navigation</span> <span class=\"icon-bar\"></span> <span class=\"icon-bar\"></span> <span class=\"icon-bar\"></span></button> <a class=\"navbar-brand\" href=\"#\">Aurelia Fundamentals</a></div><div class=\"collapse navbar-collapse\" id=\"bs-example-navbar-collapse-1\"><ul class=\"nav navbar-nav\"><li repeat.for=\"route of router.navigation\" class=\"${route.isActive ? 'active' : ''}\"><a data-toggle=\"collapse\" data-target=\"#bs-example-navbar-collapse-1.in\" href.bind=\"route.href\">${route.title}</a></li></ul><ul class=\"nav navbar-nav navbar-right\"><li><i class=\"fa fa-cog fa-spin fa-3x\" style=\"margin:0 auto\" if.bind=\"router.isNavigating\"></i></li></ul></div></div></nav><div class=\"container-fluid\"><div class=\"col-xs-10\"><router-view></router-view></div><div class=\"col-xs-2\"><compose view-model=\"sponsors/sponsors\"></compose></div></div></template>"; });
 //# sourceMappingURL=app-bundle.js.map

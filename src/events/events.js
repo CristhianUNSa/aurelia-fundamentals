@@ -1,18 +1,12 @@
 import {DataRepository} from './../services/dataRepository';
-import {inject, Lazy, All} from 'aurelia-framework';
-import {ImLazy} from './../im-lazy';
+import {inject} from 'aurelia-framework';
 import {Router} from 'aurelia-router';
 
-@inject(DataRepository, Router, Lazy.of(ImLazy), All.of('SuperPlugIn'))
+@inject(DataRepository, Router)
 export class Events {
-  constructor(dataRepository, router, lazyOfImLazy, plugins) {
+  constructor(dataRepository, router) {
     this.dataRepository = dataRepository;
     this.router = router;
-    this.lazyOfImLazy = lazyOfImLazy;
-
-    plugins.forEach(function(plugin) {
-      plugin.doPlugInStuff();
-    });
   }
 
   activate(params) {

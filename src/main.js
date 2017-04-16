@@ -25,5 +25,5 @@ export function configure(aurelia) {
   //   return id.replace('viewmodels', 'views') + '.html';
   // };
 
-  aurelia.start().then(() => aurelia.setRoot('app'));
+  aurelia.start().then(() => aurelia.setRoot('shell'));
 }
