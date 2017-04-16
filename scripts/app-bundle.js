@@ -19,7 +19,7 @@ define('app',['exports'], function (exports) {
     App.prototype.configureRouter = function configureRouter(config, router) {
       this.router = router;
       config.title = 'Aurelia Fundamentals';
-      config.map([{ route: ['', 'events'], moduleId: './events/events', name: 'Events', title: 'Events', nav: true }, { route: 'jobs', moduleId: './jobs/jobs', title: 'Jobs', nav: true }, { route: 'discussion', moduleId: './discussion/discussion', title: 'Discussion', nav: true }]);
+      config.map([{ route: ['', 'events'], moduleId: './events/events', name: 'Events', title: 'Events', nav: true }, { route: 'jobs', moduleId: './jobs/jobs', title: 'Jobs', nav: true }, { route: 'discussion', moduleId: './discussion/discussion', title: 'Discussion', nav: true }, { route: 'eventDetail/:eventId', moduleId: './events/eventDetail', name: 'eventDetail' }]);
     };
 
     return App;
@@ -168,46 +168,6 @@ define('plugin2',['exports'], function (exports) {
     return Plugin2;
   }();
 });
-define('events/events',['exports', './../services/dataRepository', 'aurelia-framework', './../im-lazy'], function (exports, _dataRepository, _aureliaFramework, _imLazy) {
-  'use strict';
-
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-  exports.Events = undefined;
-
-  function _classCallCheck(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-
-  var _dec, _class;
-
-  var Events = exports.Events = (_dec = (0, _aureliaFramework.inject)(_dataRepository.DataRepository, _aureliaFramework.Lazy.of(_imLazy.ImLazy), _aureliaFramework.All.of('SuperPlugIn')), _dec(_class = function () {
-    function Events(dataRepository, lazyOfImLazy, plugins) {
-      var _this = this;
-
-      _classCallCheck(this, Events);
-
-      dataRepository.getEvents().then(function (events) {
-        return _this.events = events;
-      });
-      this.lazyOfImLazy = lazyOfImLazy;
-
-      plugins.forEach(function (plugin) {
-        plugin.doPlugInStuff();
-      });
-    }
-
-    Events.prototype.createAndUseLazy = function createAndUseLazy() {
-      console.log('about to use lazy');
-      this.lazyOfImLazy().doStuff();
-    };
-
-    return Events;
-  }()) || _class);
-});
 define('discussion/discussion',["exports"], function (exports) {
   "use strict";
 
@@ -224,6 +184,96 @@ define('discussion/discussion',["exports"], function (exports) {
   var Discussion = exports.Discussion = function Discussion() {
     _classCallCheck(this, Discussion);
   };
+});
+define('events/eventDetail',['exports', 'aurelia-framework', 'services/dataRepository'], function (exports, _aureliaFramework, _dataRepository) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.EventDetail = undefined;
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var _dec, _class;
+
+  var EventDetail = exports.EventDetail = (_dec = (0, _aureliaFramework.inject)(_dataRepository.DataRepository), _dec(_class = function () {
+    function EventDetail(dataRepository) {
+      _classCallCheck(this, EventDetail);
+
+      this.dataRepository = dataRepository;
+    }
+
+    EventDetail.prototype.activate = function activate(params, routeConfig) {
+      this.event = this.dataRepository.getEvent(parseInt(params.eventId, 10));
+    };
+
+    return EventDetail;
+  }()) || _class);
+});
+define('events/events',['exports', './../services/dataRepository', 'aurelia-framework', './../im-lazy', 'aurelia-router'], function (exports, _dataRepository, _aureliaFramework, _imLazy, _aureliaRouter) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.Events = undefined;
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var _dec, _class;
+
+  var Events = exports.Events = (_dec = (0, _aureliaFramework.inject)(_dataRepository.DataRepository, _aureliaRouter.Router, _aureliaFramework.Lazy.of(_imLazy.ImLazy), _aureliaFramework.All.of('SuperPlugIn')), _dec(_class = function () {
+    function Events(dataRepository, router, lazyOfImLazy, plugins) {
+      _classCallCheck(this, Events);
+
+      this.dataRepository = dataRepository;
+      this.router = router;
+      this.lazyOfImLazy = lazyOfImLazy;
+
+      plugins.forEach(function (plugin) {
+        plugin.doPlugInStuff();
+      });
+    }
+
+    Events.prototype.activate = function activate(params) {
+      var _this = this;
+
+      this.dataRepository.getEvents().then(function (events) {
+        if (params.speaker || params.topic) {
+          var filteredResults = [];
+          events.forEach(function (item) {
+            if (params.speaker && item.speaker.toLowerCase().indexOf(params.speaker.toLowerCase()) >= 0) {
+              if (filteredResults.indexOf(item) === -1) filteredResults.push(item);
+            }
+            if (params.topic && item.topic.toLowerCase().indexOf(params.topic.toLowerCase()) >= 0) {
+              if (filteredResults.indexOf(item) === -1) filteredResults.push(item);
+            }
+          });
+          _this.events = filteredResults;
+        } else {
+          _this.events = events;
+        }
+        _this.events.forEach(function (item) {
+          return item.detailUrl = _this.router.generate('eventDetail', { eventId: item.id });
+        });
+      });
+    };
+
+    Events.prototype.goToDiscussion = function goToDiscussion() {
+      this.router.navigate('#/discussion');
+    };
+
+    return Events;
+  }()) || _class);
 });
 define('jobs/jobs',["exports"], function (exports) {
   "use strict";
@@ -276,8 +326,6 @@ define('services/dataRepository',['exports', './eventsData', 'moment'], function
   var DataRepository = exports.DataRepository = function () {
     function DataRepository() {
       _classCallCheck(this, DataRepository);
-
-      this.events = _eventsData.eventsData;
     }
 
     DataRepository.prototype.getEvents = function getEvents() {
@@ -717,8 +765,9 @@ define('sponsors/sponsors',["exports"], function (exports) {
 });
 define('text!app.html', ['module'], function(module) { module.exports = "<template><require from=\"bootstrap/css/bootstrap.css\"></require><nav class=\"navbar navbar-default\"><div class=\"container-fluid\"><div class=\"navbar-header\"><button type=\"button\" class=\"navbar-toggle collapsed\" data-toggle=\"collapse\" data-target=\"#bs-example-navbar-collapse-1\" aria-expanded=\"false\"><span class=\"sr-only\">Toggle navigation</span> <span class=\"icon-bar\"></span> <span class=\"icon-bar\"></span> <span class=\"icon-bar\"></span></button> <a class=\"navbar-brand\" href=\"#\">Aurelia Fundamentals</a></div><div class=\"collapse navbar-collapse\" id=\"bs-example-navbar-collapse-1\"><ul class=\"nav navbar-nav\"><li repeat.for=\"route of router.navigation\" class=\"${route.isActive ? 'active' : ''}\"><a data-toggle=\"collapse\" data-target=\"#bs-example-navbar-collapse-1.in\" href.bind=\"route.href\">${route.title}</a></li></ul></div></div></nav><div class=\"container-fluid\"><div class=\"col-xs-10\"><router-view></router-view></div><div class=\"col-xs-2\"><compose view-model=\"sponsors/sponsors\"></compose></div></div></template>"; });
 define('text!discussion/discussion.html', ['module'], function(module) { module.exports = "<template>Discussion</template>"; });
-define('text!events/event.html', ['module'], function(module) { module.exports = "<template><div class=\"bg-success rbox\">${event.id} : ${event.title}</div></template>"; });
-define('text!events/events.html', ['module'], function(module) { module.exports = "<template><div repeat.for=\"event of events\"><compose model.bind=\"event\" view=\"./event.html\"></compose></div><button type=\"button\" click.trigger=\"createAndUseLazy()\">Use Lazy</button></template>"; });
+define('text!events/event.html', ['module'], function(module) { module.exports = "<template><div class=\"bg-success rbox\"><a href.bind=\"event.detailUrl\">${event.id} : ${event.title}</a></div></template>"; });
+define('text!events/eventDetail.html', ['module'], function(module) { module.exports = "<template><div class=\"row\"><div class=\"col-md-1\"><img src=\"images/speakers/${event.image}\" style=\"width:100%;max-width:200px\"></div><div class=\"col-md-11\"><h3>${event.title}</h3><h5>${event.dateTime}</h5></div></div><div class=\"row\"><div class=\"col-m-12\">${event.description}</div></div></template>"; });
+define('text!events/events.html', ['module'], function(module) { module.exports = "<template><div repeat.for=\"event of events\"><compose model.bind=\"event\" view=\"./event.html\"></compose></div><button type=\"button\" click.trigger=\"goToDiscussion()\">Go to discussion</button></template>"; });
 define('text!jobs/jobs.html', ['module'], function(module) { module.exports = "<template>Jobs</template>"; });
 define('text!sponsors/sponsors.html', ['module'], function(module) { module.exports = "<template>Sponsors</template>"; });
 //# sourceMappingURL=app-bundle.js.map
