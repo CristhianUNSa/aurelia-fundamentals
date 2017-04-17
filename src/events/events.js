@@ -1,36 +1,23 @@
-import {DataRepository} from './../services/dataRepository';
-import {inject} from 'aurelia-framework';
-import {Router} from 'aurelia-router';
-
-@inject(DataRepository, Router)
 export class Events {
-  constructor(dataRepository, router) {
-    this.dataRepository = dataRepository;
+  configureRouter(config, router) {
     this.router = router;
-  }
-
-  activate(params) {
-    this.dataRepository.getEvents().then(events => {
-      if (params.speaker || params.topic) {
-        let filteredResults = [];
-        events.forEach(item=> {
-          if (params.speaker && item.speaker.toLowerCase().indexOf(params.speaker.toLowerCase()) >= 0) {
-            if (filteredResults.indexOf(item) === -1) filteredResults.push(item);
-          }
-          if (params.topic && item.topic.toLowerCase().indexOf(params.topic.toLowerCase()) >= 0) {
-            if (filteredResults.indexOf(item) === -1) filteredResults.push(item);
-          }
-        });
-        this.events = filteredResults;
-      } else {
-        this.events = events;
+    config.title = 'Events';
+    config.map([
+      {
+        route: ['', 'future'],
+        moduleId: 'events/eventsList',
+        title: 'Future Events',
+        nav: true,
+        name: 'future'
+      },
+      {
+        route: ['past'],
+        moduleId: 'events/eventsList',
+        title: 'Past Events',
+        nav: true,
+        href: 'events/past',
+        name: 'past'
       }
-      this.events.forEach(item => item.detailUrl = this.router.generate('eventDetail', {eventId: item.id}));
-    });
-  }
-
-  goToDiscussion() {
-    this.router.navigate('#/discussion');
-    //this.router.navigateToRoute('eventDetail', {eventId: this.events[0].id});
+    ]);
   }
 }

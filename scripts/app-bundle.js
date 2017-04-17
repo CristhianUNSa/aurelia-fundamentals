@@ -1,30 +1,3 @@
-define('app',['exports'], function (exports) {
-  'use strict';
-
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-
-  function _classCallCheck(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-
-  var App = exports.App = function () {
-    function App() {
-      _classCallCheck(this, App);
-    }
-
-    App.prototype.configureRouter = function configureRouter(config, router) {
-      this.router = router;
-      config.title = 'Aurelia Fundamentals';
-      config.map([{ route: ['', 'events'], moduleId: './events/events', name: 'Events', title: 'Events', nav: true }, { route: 'jobs', moduleId: './jobs/jobs', title: 'Jobs', nav: true }, { route: 'discussion', moduleId: './discussion/discussion', title: 'Discussion', nav: true }, { route: 'eventDetail/:eventId', moduleId: './events/eventDetail', name: 'eventDetail' }]);
-    };
-
-    return App;
-  }();
-});
 define('data-cache',['exports'], function (exports) {
   'use strict';
 
@@ -56,34 +29,7 @@ define('environment',["exports"], function (exports) {
     testing: true
   };
 });
-define('im-lazy',['exports'], function (exports) {
-  'use strict';
-
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-
-  function _classCallCheck(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-
-  var ImLazy = exports.ImLazy = function () {
-    function ImLazy() {
-      _classCallCheck(this, ImLazy);
-
-      console.log('ImLazy constructor');
-    }
-
-    ImLazy.prototype.doStuff = function doStuff() {
-      console.log('ImLazy but doing stuff');
-    };
-
-    return ImLazy;
-  }();
-});
-define('main',['exports', './environment', 'aurelia-framework', './plugin1', './plugin2'], function (exports, _environment, _aureliaFramework, _plugin, _plugin2) {
+define('main',['exports', './environment'], function (exports, _environment) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
@@ -100,8 +46,6 @@ define('main',['exports', './environment', 'aurelia-framework', './plugin1', './
   }
 
   function configure(aurelia) {
-    aurelia.use.transient('SuperPlugIn', _plugin.Plugin1);
-    aurelia.use.transient('SuperPlugIn', _plugin2.Plugin2);
 
     aurelia.use.standardConfiguration().feature('resources');
 
@@ -112,18 +56,26 @@ define('main',['exports', './environment', 'aurelia-framework', './plugin1', './
     if (_environment2.default.testing) {
       aurelia.use.plugin('aurelia-testing');
     }
-
     aurelia.start().then(function () {
       return aurelia.setRoot('shell');
     });
   }
 });
-define('plugin1',['exports'], function (exports) {
+define('shell',['exports', 'toastr'], function (exports, _toastr) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
     value: true
   });
+  exports.App = undefined;
+
+  var _toastr2 = _interopRequireDefault(_toastr);
+
+  function _interopRequireDefault(obj) {
+    return obj && obj.__esModule ? obj : {
+      default: obj
+    };
+  }
 
   function _classCallCheck(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
@@ -131,41 +83,70 @@ define('plugin1',['exports'], function (exports) {
     }
   }
 
-  var Plugin1 = exports.Plugin1 = function () {
-    function Plugin1() {
-      _classCallCheck(this, Plugin1);
+  var App = exports.App = function () {
+    function App() {
+      _classCallCheck(this, App);
     }
 
-    Plugin1.prototype.doPlugInStuff = function doPlugInStuff() {
-      console.log('Plugin1 doing stuff');
+    App.prototype.configureRouter = function configureRouter(config, router) {
+      this.router = router;
+      config.title = 'Aurelia Fundamentals';
+      config.addPipelineStep('authorize', NavToastStep);
+
+      config.map([{
+        route: ['', 'events'],
+        viewPorts: {
+          mainContent: { moduleId: './events/events' },
+          sideBar: { moduleId: './sideBar/sponsors' }
+        },
+        name: 'Events',
+        title: 'Events',
+        nav: true
+      }, {
+        route: 'jobs',
+        viewPorts: {
+          mainContent: { moduleId: './jobs/jobs' },
+          sideBar: { moduleId: './sideBar/sponsors' }
+        },
+        title: 'Jobs',
+        nav: true
+      }, {
+        route: 'discussion',
+        viewPorts: {
+          mainContent: { moduleId: './discussion/discussion' },
+          sideBar: { moduleId: './sideBar/ads' }
+        },
+        title: 'Discussion',
+        nav: true
+      }, {
+        route: 'eventDetail/:eventId',
+        viewPorts: {
+          mainContent: { moduleId: './events/eventDetail' },
+          sideBar: { moduleId: './sideBar/ads' }
+        },
+        name: 'eventDetail'
+      }]);
     };
 
-    return Plugin1;
+    return App;
   }();
-});
-define('plugin2',['exports'], function (exports) {
-  'use strict';
 
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-
-  function _classCallCheck(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-
-  var Plugin2 = exports.Plugin2 = function () {
-    function Plugin2() {
-      _classCallCheck(this, Plugin2);
+  var NavToastStep = function () {
+    function NavToastStep() {
+      _classCallCheck(this, NavToastStep);
     }
 
-    Plugin2.prototype.doPlugInStuff = function doPlugInStuff() {
-      console.log('Plugin2 doing stuff');
+    NavToastStep.prototype.run = function run(navigationInstruction, next) {
+      return next().then(function (result) {
+        if (result.status === 'canceled') {
+          _toastr2.default.error('Navigation cancelled');
+        }
+
+        return result;
+      });
     };
 
-    return Plugin2;
+    return NavToastStep;
   }();
 });
 define('discussion/discussion',['exports'], function (exports) {
@@ -248,7 +229,47 @@ define('events/eventDetail',['exports', 'aurelia-framework', 'services/dataRepos
     return EventDetail;
   }()) || _class);
 });
-define('events/events',['exports', './../services/dataRepository', 'aurelia-framework', 'aurelia-router'], function (exports, _dataRepository, _aureliaFramework, _aureliaRouter) {
+define('events/events',['exports'], function (exports) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var Events = exports.Events = function () {
+    function Events() {
+      _classCallCheck(this, Events);
+    }
+
+    Events.prototype.configureRouter = function configureRouter(config, router) {
+      this.router = router;
+      config.title = 'Events';
+      config.map([{
+        route: ['', 'future'],
+        moduleId: 'events/eventsList',
+        title: 'Future Events',
+        nav: true,
+        name: 'future'
+      }, {
+        route: ['past'],
+        moduleId: 'events/eventsList',
+        title: 'Past Events',
+        nav: true,
+        href: 'events/past',
+        name: 'past'
+      }]);
+    };
+
+    return Events;
+  }();
+});
+define('events/eventsList',['exports', './../services/dataRepository', 'aurelia-framework', 'aurelia-router'], function (exports, _dataRepository, _aureliaFramework, _aureliaRouter) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
@@ -272,10 +293,11 @@ define('events/events',['exports', './../services/dataRepository', 'aurelia-fram
       this.router = router;
     }
 
-    Events.prototype.activate = function activate(params) {
+    Events.prototype.activate = function activate(params, routeConfig) {
       var _this = this;
 
-      this.dataRepository.getEvents().then(function (events) {
+      var pastOrFuture = routeConfig.name === '' ? 'future' : routeConfig.name;
+      this.dataRepository.getEvents(pastOrFuture).then(function (events) {
         if (params.speaker || params.topic) {
           var filteredResults = [];
           events.forEach(function (item) {
@@ -296,12 +318,33 @@ define('events/events',['exports', './../services/dataRepository', 'aurelia-fram
       });
     };
 
+    Events.prototype.determineActivationStrategy = function determineActivationStrategy() {
+      return _aureliaRouter.activationStrategy.invokeLifecycle;
+    };
+
     Events.prototype.goToDiscussion = function goToDiscussion() {
       this.router.navigate('#/discussion');
     };
 
     return Events;
   }()) || _class);
+});
+define('events/past',["exports"], function (exports) {
+  "use strict";
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var Past = exports.Past = function Past() {
+    _classCallCheck(this, Past);
+  };
 });
 define('jobs/jobs',["exports"], function (exports) {
   "use strict";
@@ -333,6 +376,15 @@ define('jobs/jobs',["exports"], function (exports) {
     return Jobs;
   }();
 });
+define('resources/index',["exports"], function (exports) {
+  "use strict";
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.configure = configure;
+  function configure(config) {}
+});
 define('services/dataRepository',['exports', './eventsData', 'moment'], function (exports, _eventsData, _moment) {
   'use strict';
 
@@ -355,26 +407,49 @@ define('services/dataRepository',['exports', './eventsData', 'moment'], function
     }
   }
 
+  function filterAndFormat(pastOrFuture, events) {
+    var results = JSON.parse(JSON.stringify(events));
+    if (pastOrFuture === 'past') {
+      results = results.filter(function (item) {
+        var itemDateTimeMoment = (0, _moment2.default)(item.dateTime);
+        var now = (0, _moment2.default)();
+        return itemDateTimeMoment.isBefore(now);
+      });
+    } else if (pastOrFuture === 'future') {
+      results = results.filter(function (item) {
+        var itemDateTimeMoment = (0, _moment2.default)(item.dateTime);
+        var now = (0, _moment2.default)();
+        return itemDateTimeMoment.isAfter(now);
+      });
+    }
+    results.forEach(function (item) {
+      var dateTime = (0, _moment2.default)(item.dateTime).format('MM/DD/YYYY HH:mm');
+      item.dateTime = dateTime;
+    });
+
+    return results;
+  }
+
   var DataRepository = exports.DataRepository = function () {
     function DataRepository() {
       _classCallCheck(this, DataRepository);
     }
 
-    DataRepository.prototype.getEvents = function getEvents() {
+    DataRepository.prototype.getEvents = function getEvents(pastOrFuture) {
       var _this = this;
 
       var promise = new Promise(function (resolve, reject) {
         if (!_this.events) {
           setTimeout(function (_) {
             _this.events = _eventsData.eventsData;
-            _this.events.forEach(function (item) {
-              var dateTime = (0, _moment2.default)(item.dateTime).format('MM/DD/YYYY HH:mm');
-              item.dateTime = dateTime;
+            var sorted = _this.events.sort(function (a, b) {
+              a.dateTime >= b.dateTime ? 1 : -1;
             });
-            resolve(_this.events);
-          }, 2000);
+            _this.events = sorted;
+            resolve(filterAndFormat(pastOrFuture, _this.events));
+          }, 60);
         } else {
-          resolve(_this.events);
+          resolve(filterAndFormat(pastOrFuture, _this.events));
         }
       });
       return promise;
@@ -778,33 +853,24 @@ define('services/jobsData',["exports"], function (exports) {
     "abbreviation": "WY"
   }];
 });
-define('sponsors/sponsors',["exports"], function (exports) {
-    "use strict";
-
-    Object.defineProperty(exports, "__esModule", {
-        value: true
-    });
-
-    function _classCallCheck(instance, Constructor) {
-        if (!(instance instanceof Constructor)) {
-            throw new TypeError("Cannot call a class as a function");
-        }
-    }
-
-    var Sponsors = exports.Sponsors = function Sponsors() {
-        _classCallCheck(this, Sponsors);
-    };
-});
-define('resources/index',["exports"], function (exports) {
+define('sideBar/ads',["exports"], function (exports) {
   "use strict";
 
   Object.defineProperty(exports, "__esModule", {
     value: true
   });
-  exports.configure = configure;
-  function configure(config) {}
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var Ads = exports.Ads = function Ads() {
+    _classCallCheck(this, Ads);
+  };
 });
-define('shell',['exports'], function (exports) {
+define('sideBar/sponsors',['exports'], function (exports) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
@@ -817,26 +883,38 @@ define('shell',['exports'], function (exports) {
     }
   }
 
-  var App = exports.App = function () {
-    function App() {
-      _classCallCheck(this, App);
+  var Sponsors = exports.Sponsors = function () {
+    function Sponsors() {
+      _classCallCheck(this, Sponsors);
+
+      this.message = 'Sponsors';
+      this.mapCollection = new window.Map();
+      this.mapCollection.set('a', 'Alpha');
+      this.mapCollection.set('b', 'Beta');
+      this.mapCollection.set('c', 'Charlie');
+      this.mapCollection.set('d', 'Delta');
+
+      this.styleString = 'background: red';
+      this.styleObject = {
+        background: 'green'
+      };
     }
 
-    App.prototype.configureRouter = function configureRouter(config, router) {
-      this.router = router;
-      config.title = 'Aurelia Fundamentals';
-      config.map([{ route: ['', 'events'], moduleId: './events/events', name: 'Events', title: 'Events', nav: true }, { route: 'jobs', moduleId: './jobs/jobs', title: 'Jobs', nav: true }, { route: 'discussion', moduleId: './discussion/discussion', title: 'Discussion', nav: true }, { route: 'eventDetail/:eventId', moduleId: './events/eventDetail', name: 'eventDetail' }]);
+    Sponsors.prototype.doSomething = function doSomething(foo, event) {
+      console.log(foo, event);
     };
 
-    return App;
+    return Sponsors;
   }();
 });
-define('text!app.html', ['module'], function(module) { module.exports = "<template><require from=\"bootstrap/css/bootstrap.css\"></require><nav class=\"navbar navbar-default\"><div class=\"container-fluid\"><div class=\"navbar-header\"><button type=\"button\" class=\"navbar-toggle collapsed\" data-toggle=\"collapse\" data-target=\"#bs-example-navbar-collapse-1\" aria-expanded=\"false\"><span class=\"sr-only\">Toggle navigation</span> <span class=\"icon-bar\"></span> <span class=\"icon-bar\"></span> <span class=\"icon-bar\"></span></button> <a class=\"navbar-brand\" href=\"#\">Aurelia Fundamentals</a></div><div class=\"collapse navbar-collapse\" id=\"bs-example-navbar-collapse-1\"><ul class=\"nav navbar-nav\"><li repeat.for=\"route of router.navigation\" class=\"${route.isActive ? 'active' : ''}\"><a data-toggle=\"collapse\" data-target=\"#bs-example-navbar-collapse-1.in\" href.bind=\"route.href\">${route.title}</a></li></ul><ul class=\"nav navbar-nav navbar-right\"><li><i class=\"fa fa-cog fa-spin fa-3x\" style=\"margin:0 auto\" if.bind=\"router.isNavigating\"></i></li></ul></div></div></nav><div class=\"container-fluid\"><div class=\"col-xs-10\"><router-view></router-view></div><div class=\"col-xs-2\"><compose view-model=\"sponsors/sponsors\"></compose></div></div></template>"; });
+define('text!shell.html', ['module'], function(module) { module.exports = "<template><require from=\"bootstrap/css/bootstrap.css\"></require><require from=\"toastr/build/toastr.min.css\"></require><nav class=\"navbar navbar-default\"><div class=\"container\"><div class=\"navbar-header\"><button type=\"button\" class=\"navbar-toggle collapsed\" data-toggle=\"collapse\" data-target=\"#bs-example-navbar-collapse-1\" aria-expanded=\"false\"><span class=\"sr-only\">Toggle navigation</span> <span class=\"icon-bar\"></span> <span class=\"icon-bar\"></span> <span class=\"icon-bar\"></span></button> <a class=\"navbar-brand\" href=\"#\">Aurelia Fundamentals</a></div><div class=\"collapse navbar-collapse\" id=\"bs-example-navbar-collapse-1\"><ul class=\"nav navbar-nav\"><li repeat.for=\"route of router.navigation\" class=\"${route.isActive ? 'active' : ''}\"><a data-toggle=\"collapse\" data-target=\"#bs-example-navbar-collapse-1.in\" href.bind=\"route.href\">${route.title}</a></li></ul><ul class=\"nav navbar-nav navbar-right\"><li><i class=\"fa fa-cog fa-spin fa-3x\" style=\"margin:0 auto\" if.bind=\"router.isNavigating\"></i></li></ul></div></div></nav><div class=\"container\"><div class=\"col-xs-10\"><router-view name=\"mainContent\"></router-view></div><div class=\"col-xs-2\"><router-view name=\"sideBar\"></router-view></div></div></template>"; });
 define('text!discussion/discussion.html', ['module'], function(module) { module.exports = "<template>Discussion input: <input type=\"text\" value.bind=\"discussionInput\"><br><button type=\"button\" click.delegate=\"save()\">Save</button></template>"; });
-define('text!events/event.html', ['module'], function(module) { module.exports = "<template><div class=\"bg-success rbox\"><a href.bind=\"event.detailUrl\">${event.id} : ${event.title}</a></div></template>"; });
-define('text!events/eventDetail.html', ['module'], function(module) { module.exports = "<template><div class=\"row\"><div class=\"col-md-1\"><img src=\"images/speakers/${event.image}\" style=\"width:100%;max-width:200px\"></div><div class=\"col-md-11\"><h3>${event.title}</h3><h5>${event.dateTime}</h5></div></div><div class=\"row\"><div class=\"col-m-12\">${event.description}</div></div></template>"; });
-define('text!events/events.html', ['module'], function(module) { module.exports = "<template><div repeat.for=\"event of events\"><compose model.bind=\"event\" view=\"./event.html\"></compose></div><button type=\"button\" click.trigger=\"goToDiscussion()\">Go to discussion</button></template>"; });
 define('text!jobs/jobs.html', ['module'], function(module) { module.exports = "<template>Jobs</template>"; });
-define('text!sponsors/sponsors.html', ['module'], function(module) { module.exports = "<template>Sponsors</template>"; });
-define('text!shell.html', ['module'], function(module) { module.exports = "<template><require from=\"bootstrap/css/bootstrap.css\"></require><nav class=\"navbar navbar-default\"><div class=\"container-fluid\"><div class=\"navbar-header\"><button type=\"button\" class=\"navbar-toggle collapsed\" data-toggle=\"collapse\" data-target=\"#bs-example-navbar-collapse-1\" aria-expanded=\"false\"><span class=\"sr-only\">Toggle navigation</span> <span class=\"icon-bar\"></span> <span class=\"icon-bar\"></span> <span class=\"icon-bar\"></span></button> <a class=\"navbar-brand\" href=\"#\">Aurelia Fundamentals</a></div><div class=\"collapse navbar-collapse\" id=\"bs-example-navbar-collapse-1\"><ul class=\"nav navbar-nav\"><li repeat.for=\"route of router.navigation\" class=\"${route.isActive ? 'active' : ''}\"><a data-toggle=\"collapse\" data-target=\"#bs-example-navbar-collapse-1.in\" href.bind=\"route.href\">${route.title}</a></li></ul><ul class=\"nav navbar-nav navbar-right\"><li><i class=\"fa fa-cog fa-spin fa-3x\" style=\"margin:0 auto\" if.bind=\"router.isNavigating\"></i></li></ul></div></div></nav><div class=\"container-fluid\"><div class=\"col-xs-10\"><router-view></router-view></div><div class=\"col-xs-2\"><compose view-model=\"sponsors/sponsors\"></compose></div></div></template>"; });
+define('text!events/event.html', ['module'], function(module) { module.exports = "<template><div class=\"bg-success rbox\"><table><tr><td><a href.bind=\"event.detailUrl\"><h3 textcontent.bind=\"event.title\"></h3></a></td></tr><tr><td><h5>${event.dateTime}</h5></td></tr><tr><td innerhtml.bind=\"event.description | sanitizeHTML\"></td></tr></table><div textcontent.two-way=\"event.description\" contenteditable=\"true\"></div></div></template>"; });
+define('text!events/eventDetail.html', ['module'], function(module) { module.exports = "<template><div class=\"row\"><div class=\"col-md-1\"><img src=\"images/speakers/${event.image}\" style=\"width:100%;max-width:200px\"></div><div class=\"col-md-11\"><h3>${event.title}</h3><h5>${event.dateTime}</h5></div></div><div class=\"row\"><div class=\"col-m-12\">${event.description}</div></div></template>"; });
+define('text!events/events.html', ['module'], function(module) { module.exports = "<template><style type=\"text/css\">.nav-tabs li a{font-size:20px}</style><ul class=\"nav nav-tabs\"><li repeat.for=\"route of router.navigation\" class=\"${route.isActive ? 'active' : '' }\"><a href.bind=\"route.href\">${route.title}</a></li></ul><router-view></router-view></template>"; });
+define('text!events/eventsList.html', ['module'], function(module) { module.exports = "<template><div repeat.for=\"event of events\"><compose model.bind=\"event\" view=\"./event.html\"></compose></div><button type=\"button\" click.trigger=\"goToDiscussion()\">Go to discussion</button></template>"; });
+define('text!events/past.html', ['module'], function(module) { module.exports = "<template>Past Events</template>"; });
+define('text!sideBar/ads.html', ['module'], function(module) { module.exports = "<template>Ads</template>"; });
+define('text!sideBar/sponsors.html', ['module'], function(module) { module.exports = "<template><div textcontent.one-way=\"message\"></div><button type=\"button\" click.trigger=\"doSomething(message, $event)\">Click me</button> <input type=\"text\" ref=\"input1\"><div style.bind=\"styleString\">${input1.value}</div><p style.bind=\"styleObject\" repeat.for=\"[key, value] of mapCollection\">${key} - ${value}</p></template>"; });
 //# sourceMappingURL=app-bundle.js.map

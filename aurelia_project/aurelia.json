@@ -153,6 +153,15 @@
             "main": "./min/moment.min",
             "path": "../node_modules/moment",
             "resources": []
+          },
+          {
+            "name": "toastr",
+            "path": "../node_modules/toastr",
+            "main": "toastr",
+            "resources": [
+              "build/toastr.min.css"
+            ],
+            "deps": ["jquery"]
           }
         ]
       }
