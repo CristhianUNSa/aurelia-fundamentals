@@ -5,4 +5,7 @@
     <div style.bind="styleString">${input1.value}</div>
     <p style.bind="styleObject" repeat.for="[key, value] of mapCollection">${key} - ${value}</p>
     
+    <input type="text" value.bind="person.firstName" />
+    <input type="text" value.bind="person.lastName" />
+    ${person.fullName}
 </template>

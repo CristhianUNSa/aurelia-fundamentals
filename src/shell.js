@@ -24,6 +24,7 @@ export class App {
       },
       {
         route: 'jobs',
+        name: 'jobs',
         viewPorts: {
           mainContent: { moduleId: './jobs/jobs' },
           sideBar: { moduleId: './sideBar/sponsors'}
@@ -47,6 +48,14 @@ export class App {
           sideBar: { moduleId: './sideBar/ads'}
         },
         name: 'eventDetail'
+      },
+      {
+        route: 'addJob',
+        viewPorts: {
+          mainContent: { moduleId: './jobs/addJob' },
+          sideBar: { moduleId: './sideBar/sponsors'}
+        },
+        name: 'addJob'
       }
     ]);
   }

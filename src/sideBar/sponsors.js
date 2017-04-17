@@ -1,3 +1,5 @@
+import {computedFrom} from 'aurelia-framework';
+
 export class Sponsors {
   constructor() {
     this.message = 'Sponsors';
@@ -11,9 +13,18 @@ export class Sponsors {
     this.styleObject = {
       background: 'green'
     };
+    this.person = new Person();
   }
 
   doSomething(foo, event) {
     console.log(foo, event);
   }
+}
+
+class Person {
+  firstName = 'Cristhian';
+  lastName = 'Valencia';
+
+  @computedFrom('firstName', 'lastName')
+  get fullName() { return this.firstName + ' ' + this.lastName; }
 }
