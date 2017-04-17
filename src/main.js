@@ -1,7 +1,7 @@
 import environment from './environment';
 
 export function configure(aurelia) {
-
+  aurelia.use.globalResources('common/dateFormat');
   aurelia.use
     .standardConfiguration()
     .feature('resources');

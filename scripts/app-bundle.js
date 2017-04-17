@@ -46,7 +46,7 @@ define('main',['exports', './environment'], function (exports, _environment) {
   }
 
   function configure(aurelia) {
-
+    aurelia.use.globalResources('common/dateFormat');
     aurelia.use.standardConfiguration().feature('resources');
 
     if (_environment2.default.debug) {
@@ -104,6 +104,7 @@ define('shell',['exports', 'toastr'], function (exports, _toastr) {
         nav: true
       }, {
         route: 'jobs',
+        name: 'jobs',
         viewPorts: {
           mainContent: { moduleId: './jobs/jobs' },
           sideBar: { moduleId: './sideBar/sponsors' }
@@ -125,6 +126,13 @@ define('shell',['exports', 'toastr'], function (exports, _toastr) {
           sideBar: { moduleId: './sideBar/ads' }
         },
         name: 'eventDetail'
+      }, {
+        route: 'addJob',
+        viewPorts: {
+          mainContent: { moduleId: './jobs/addJob' },
+          sideBar: { moduleId: './sideBar/sponsors' }
+        },
+        name: 'addJob'
       }]);
     };
 
@@ -198,6 +206,101 @@ define('discussion/discussion',['exports'], function (exports) {
 
     return Discussion;
   }();
+});
+define('jobs/addJob',['exports', 'aurelia-framework', 'services/dataRepository'], function (exports, _aureliaFramework, _dataRepository) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.AddJob = undefined;
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var _dec, _class;
+
+  var AddJob = exports.AddJob = (_dec = (0, _aureliaFramework.inject)(_dataRepository.DataRepository), _dec(_class = function () {
+    function AddJob(dataRepository) {
+      var _this = this;
+
+      _classCallCheck(this, AddJob);
+
+      this.job = { jobType: 'Full Time', jobSkills: [] };
+      this.dataRepository = dataRepository;
+      this.dataRepository.getStates().then(function (states) {
+        _this.states = states;
+      });
+      this.dataRepository.getJobTypes().then(function (jobTypes) {
+        _this.jobTypes = jobTypes;
+      });
+      this.dataRepository.getJobSkills().then(function (jobSkills) {
+        _this.jobSkills = jobSkills;
+      });
+    }
+
+    AddJob.prototype.activate = function activate(params, routeConfig, navigationInstruction) {
+      this.router = navigationInstruction.router;
+    };
+
+    AddJob.prototype.save = function save() {
+      var _this2 = this;
+
+      if (this.job.needDate) {
+        this.job.needDate = new Date(this.job.needDate);
+      }
+      console.log(this.job);
+      this.dataRepository.addJob(this.job).then(function (job) {
+        return _this2.router.navigateToRoute('jobs');
+      });
+    };
+
+    return AddJob;
+  }()) || _class);
+});
+define('jobs/jobs',['exports', 'aurelia-framework', './../services/dataRepository'], function (exports, _aureliaFramework, _dataRepository) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.Jobs = undefined;
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var _dec, _class;
+
+  var Jobs = exports.Jobs = (_dec = (0, _aureliaFramework.inject)(_dataRepository.DataRepository), _dec(_class = function () {
+    function Jobs(dataRepository) {
+      _classCallCheck(this, Jobs);
+
+      this.dataRepository = dataRepository;
+    }
+
+    Jobs.prototype.activate = function activate(params, routeConfig, navigationInstruction) {
+      var _this = this;
+
+      this.jobs = [];
+      this.router = navigationInstruction.router;
+      return this.dataRepository.getJobs().then(function (jobs) {
+        console.log(jobs);
+        _this.jobs = jobs;
+      });
+    };
+
+    Jobs.prototype.addJob = function addJob() {
+      this.router.navigateToRoute('addJob');
+    };
+
+    return Jobs;
+  }()) || _class);
 });
 define('events/eventDetail',['exports', 'aurelia-framework', 'services/dataRepository'], function (exports, _aureliaFramework, _dataRepository) {
   'use strict';
@@ -346,36 +449,6 @@ define('events/past',["exports"], function (exports) {
     _classCallCheck(this, Past);
   };
 });
-define('jobs/jobs',["exports"], function (exports) {
-  "use strict";
-
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-
-  function _classCallCheck(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-
-  var Jobs = exports.Jobs = function () {
-    function Jobs() {
-      _classCallCheck(this, Jobs);
-    }
-
-    Jobs.prototype.canActivate = function canActivate(params, routeConfig) {
-      var promise = new Promise(function (resolve, reject) {
-        setTimeout(function (_) {
-          return resolve(false);
-        }, 3000);
-      });
-      return promise;
-    };
-
-    return Jobs;
-  }();
-});
 define('resources/index',["exports"], function (exports) {
   "use strict";
 
@@ -385,7 +458,7 @@ define('resources/index',["exports"], function (exports) {
   exports.configure = configure;
   function configure(config) {}
 });
-define('services/dataRepository',['exports', './eventsData', 'moment'], function (exports, _eventsData, _moment) {
+define('services/dataRepository',['exports', './eventsData', './jobsData', 'moment'], function (exports, _eventsData, _jobsData, _moment) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
@@ -422,10 +495,6 @@ define('services/dataRepository',['exports', './eventsData', 'moment'], function
         return itemDateTimeMoment.isAfter(now);
       });
     }
-    results.forEach(function (item) {
-      var dateTime = (0, _moment2.default)(item.dateTime).format('MM/DD/YYYY HH:mm');
-      item.dateTime = dateTime;
-    });
 
     return results;
   }
@@ -459,6 +528,67 @@ define('services/dataRepository',['exports', './eventsData', 'moment'], function
       return this.events.find(function (item) {
         return item.id === eventId;
       });
+    };
+
+    DataRepository.prototype.getStates = function getStates() {
+      var _this2 = this;
+
+      var promise = new Promise(function (resolve, reject) {
+        if (!_this2.states) {
+          _this2.states = _jobsData.states;
+        }
+        resolve(_this2.states);
+      });
+      return promise;
+    };
+
+    DataRepository.prototype.getJobTypes = function getJobTypes() {
+      var _this3 = this;
+
+      var promise = new Promise(function (resolve, reject) {
+        if (!_this3.jobTypes) {
+          _this3.jobTypes = _jobsData.jobTypes;
+        }
+        resolve(_this3.jobTypes);
+      });
+      return promise;
+    };
+
+    DataRepository.prototype.getJobSkills = function getJobSkills() {
+      var _this4 = this;
+
+      var promise = new Promise(function (resolve, reject) {
+        if (!_this4.jobSkills) {
+          _this4.jobSkills = _jobsData.jobSkills;
+        }
+        resolve(_this4.jobSkills);
+      });
+      return promise;
+    };
+
+    DataRepository.prototype.getJobs = function getJobs() {
+      var _this5 = this;
+
+      var promise = new Promise(function (resolve, reject) {
+        if (!_this5.jobs) {
+          _this5.jobs = _jobsData.jobsData;
+        }
+        resolve(_this5.jobs);
+      });
+      return promise;
+    };
+
+    DataRepository.prototype.addJob = function addJob(job) {
+      var _this6 = this;
+
+      var promise = new Promise(function (resolve, reject) {
+        if (!_this6.jobs) {
+          _this6.jobs = [];
+        }
+        _this6.jobs.push(job);
+        resolve(job);
+      });
+      return promise;
     };
 
     return DataRepository;
@@ -870,12 +1000,62 @@ define('sideBar/ads',["exports"], function (exports) {
     _classCallCheck(this, Ads);
   };
 });
-define('sideBar/sponsors',['exports'], function (exports) {
+define('sideBar/sponsors',['exports', 'aurelia-framework'], function (exports, _aureliaFramework) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
     value: true
   });
+  exports.Sponsors = undefined;
+
+  var _createClass = function () {
+    function defineProperties(target, props) {
+      for (var i = 0; i < props.length; i++) {
+        var descriptor = props[i];
+        descriptor.enumerable = descriptor.enumerable || false;
+        descriptor.configurable = true;
+        if ("value" in descriptor) descriptor.writable = true;
+        Object.defineProperty(target, descriptor.key, descriptor);
+      }
+    }
+
+    return function (Constructor, protoProps, staticProps) {
+      if (protoProps) defineProperties(Constructor.prototype, protoProps);
+      if (staticProps) defineProperties(Constructor, staticProps);
+      return Constructor;
+    };
+  }();
+
+  function _applyDecoratedDescriptor(target, property, decorators, descriptor, context) {
+    var desc = {};
+    Object['ke' + 'ys'](descriptor).forEach(function (key) {
+      desc[key] = descriptor[key];
+    });
+    desc.enumerable = !!desc.enumerable;
+    desc.configurable = !!desc.configurable;
+
+    if ('value' in desc || desc.initializer) {
+      desc.writable = true;
+    }
+
+    desc = decorators.slice().reverse().reduce(function (desc, decorator) {
+      return decorator(target, property, desc) || desc;
+    }, desc);
+
+    if (context && desc.initializer !== void 0) {
+      desc.value = desc.initializer ? desc.initializer.call(context) : void 0;
+      desc.initializer = undefined;
+    }
+
+    if (desc.initializer === void 0) {
+      Object['define' + 'Property'](target, property, desc);
+      desc = null;
+    }
+
+    return desc;
+  }
+
+  var _dec, _desc, _value, _class;
 
   function _classCallCheck(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
@@ -898,6 +1078,7 @@ define('sideBar/sponsors',['exports'], function (exports) {
       this.styleObject = {
         background: 'green'
       };
+      this.person = new Person();
     }
 
     Sponsors.prototype.doSomething = function doSomething(foo, event) {
@@ -906,15 +1087,72 @@ define('sideBar/sponsors',['exports'], function (exports) {
 
     return Sponsors;
   }();
+
+  var Person = (_dec = (0, _aureliaFramework.computedFrom)('firstName', 'lastName'), (_class = function () {
+    function Person() {
+      _classCallCheck(this, Person);
+
+      this.firstName = 'Cristhian';
+      this.lastName = 'Valencia';
+    }
+
+    _createClass(Person, [{
+      key: 'fullName',
+      get: function get() {
+        return this.firstName + ' ' + this.lastName;
+      }
+    }]);
+
+    return Person;
+  }(), (_applyDecoratedDescriptor(_class.prototype, 'fullName', [_dec], Object.getOwnPropertyDescriptor(_class.prototype, 'fullName'), _class.prototype)), _class));
+});
+define('common/dateFormat',['exports', 'moment'], function (exports, _moment) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.DateFormatValueConverter = undefined;
+
+  var _moment2 = _interopRequireDefault(_moment);
+
+  function _interopRequireDefault(obj) {
+    return obj && obj.__esModule ? obj : {
+      default: obj
+    };
+  }
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var DateFormatValueConverter = exports.DateFormatValueConverter = function () {
+    function DateFormatValueConverter() {
+      _classCallCheck(this, DateFormatValueConverter);
+    }
+
+    DateFormatValueConverter.prototype.toView = function toView(value) {
+      return (0, _moment2.default)(value).format('M/D/YYYY h:mm a');
+    };
+
+    DateFormatValueConverter.prototype.fromView = function fromView(value) {
+      return new Date(value);
+    };
+
+    return DateFormatValueConverter;
+  }();
 });
 define('text!shell.html', ['module'], function(module) { module.exports = "<template><require from=\"bootstrap/css/bootstrap.css\"></require><require from=\"toastr/build/toastr.min.css\"></require><nav class=\"navbar navbar-default\"><div class=\"container\"><div class=\"navbar-header\"><button type=\"button\" class=\"navbar-toggle collapsed\" data-toggle=\"collapse\" data-target=\"#bs-example-navbar-collapse-1\" aria-expanded=\"false\"><span class=\"sr-only\">Toggle navigation</span> <span class=\"icon-bar\"></span> <span class=\"icon-bar\"></span> <span class=\"icon-bar\"></span></button> <a class=\"navbar-brand\" href=\"#\">Aurelia Fundamentals</a></div><div class=\"collapse navbar-collapse\" id=\"bs-example-navbar-collapse-1\"><ul class=\"nav navbar-nav\"><li repeat.for=\"route of router.navigation\" class=\"${route.isActive ? 'active' : ''}\"><a data-toggle=\"collapse\" data-target=\"#bs-example-navbar-collapse-1.in\" href.bind=\"route.href\">${route.title}</a></li></ul><ul class=\"nav navbar-nav navbar-right\"><li><i class=\"fa fa-cog fa-spin fa-3x\" style=\"margin:0 auto\" if.bind=\"router.isNavigating\"></i></li></ul></div></div></nav><div class=\"container\"><div class=\"col-xs-10\"><router-view name=\"mainContent\"></router-view></div><div class=\"col-xs-2\"><router-view name=\"sideBar\"></router-view></div></div></template>"; });
 define('text!discussion/discussion.html', ['module'], function(module) { module.exports = "<template>Discussion input: <input type=\"text\" value.bind=\"discussionInput\"><br><button type=\"button\" click.delegate=\"save()\">Save</button></template>"; });
-define('text!jobs/jobs.html', ['module'], function(module) { module.exports = "<template>Jobs</template>"; });
-define('text!events/event.html', ['module'], function(module) { module.exports = "<template><div class=\"bg-success rbox\"><table><tr><td><a href.bind=\"event.detailUrl\"><h3 textcontent.bind=\"event.title\"></h3></a></td></tr><tr><td><h5>${event.dateTime}</h5></td></tr><tr><td innerhtml.bind=\"event.description | sanitizeHTML\"></td></tr></table><div textcontent.two-way=\"event.description\" contenteditable=\"true\"></div></div></template>"; });
-define('text!events/eventDetail.html', ['module'], function(module) { module.exports = "<template><div class=\"row\"><div class=\"col-md-1\"><img src=\"images/speakers/${event.image}\" style=\"width:100%;max-width:200px\"></div><div class=\"col-md-11\"><h3>${event.title}</h3><h5>${event.dateTime}</h5></div></div><div class=\"row\"><div class=\"col-m-12\">${event.description}</div></div></template>"; });
+define('text!events/event.html', ['module'], function(module) { module.exports = "<template><div class=\"bg-success rbox\"><table><tr><td><a href.bind=\"event.detailUrl\"><h3 textcontent.bind=\"event.title\"></h3></a></td></tr><tr><td><h5>${event.dateTime | dateFormat}</h5></td></tr><tr><td innerhtml.bind=\"event.description | sanitizeHTML\"></td></tr></table><div textcontent.two-way=\"event.description\" contenteditable=\"true\"></div></div></template>"; });
+define('text!events/eventDetail.html', ['module'], function(module) { module.exports = "<template><div class=\"row\"><div class=\"col-md-1\"><img src=\"images/speakers/${event.image}\" style=\"width:100%;max-width:200px\"></div><div class=\"col-md-11\"><h3>${event.title}</h3><h5>${event.dateTime | dateFormat}</h5></div></div><div class=\"row\"><div class=\"col-m-12\">${event.description}</div></div></template>"; });
 define('text!events/events.html', ['module'], function(module) { module.exports = "<template><style type=\"text/css\">.nav-tabs li a{font-size:20px}</style><ul class=\"nav nav-tabs\"><li repeat.for=\"route of router.navigation\" class=\"${route.isActive ? 'active' : '' }\"><a href.bind=\"route.href\">${route.title}</a></li></ul><router-view></router-view></template>"; });
 define('text!events/eventsList.html', ['module'], function(module) { module.exports = "<template><div repeat.for=\"event of events\"><compose model.bind=\"event\" view=\"./event.html\"></compose></div><button type=\"button\" click.trigger=\"goToDiscussion()\">Go to discussion</button></template>"; });
 define('text!events/past.html', ['module'], function(module) { module.exports = "<template>Past Events</template>"; });
+define('text!jobs/addJob.html', ['module'], function(module) { module.exports = "<template><form submit.delegate=\"save()\"><div class=\"form-group\"><label for=\"title\">Title</label><input type=\"text\" value.bind=\"job.title\" class=\"form-control\" id=\"title\" placeholder=\"Title\"></div><div class=\"form-group\"><label for=\"description\">Description</label><textarea value.bind=\"job.description\" class=\"form-control\" id=\"description\" placeholder=\"Description\" rows=\"5\"></textarea></div><div class=\"form-group\"><label for=\"needDate\">Need Date</label><input type=\"text\" id=\"needDate\" value.bind=\"job.needDate | dateFormat & updateTrigger:'blur'\" placeholder=\"Need Date\"></div><div class=\"form-group\"><label for=\"jobType\">Job Type:</label><label repeat.for=\"jobType of jobTypes\"><input type=\"radio\" name=\"jobType\" value.bind=\"jobType\" checked.bind=\"$parent.job.jobType\"> ${jobType}</label></div><div class=\"form-group\"><label>Job Skills:</label><label repeat.for=\"jobSkill of jobSkills\"><input type=\"checkbox\" value.bind=\"jobSkill\" checked.bind=\"$parent.job.jobSkills\"> ${jobSkill}</label></div><div class=\"form-group\"><label for=\"city\">City</label><input type=\"text\" id=\"city\" value.bind=\"job.location.city\" placeholder=\"City\"></div><div class=\"form-group\"><label for=\"state\">State</label><select id=\"state\" value.bind=\"job.location.state\"><option>Select State</option><option repeat.for=\"state of states\" model.bind=\"state.abbreviation\">${state.name} (${state.abbreviation})</option></select></div><button type=\"submit\" class=\"btn btn-primary\">Save</button></form></template>"; });
+define('text!jobs/jobs.html', ['module'], function(module) { module.exports = "<template><h3>Job Listings</h3><button type=\"button\" click.delegate=\"addJob()\"><img src=\"images/Add-New.png\"></button><table class=\"table table-striped\"><thead><tr><th>Title</th><th>Need Date</th><th>Location</th><th>Technologies</th></tr></thead><tbody><tr repeat.for=\"job of jobs\"><td>${job.title}</td><td>${job.needDate | dateFormat}</td><td>${job.location.city},${job.location.state}</td><td>${job.jobSkills.join(', ')}</td></tr></tbody></table></template>"; });
 define('text!sideBar/ads.html', ['module'], function(module) { module.exports = "<template>Ads</template>"; });
-define('text!sideBar/sponsors.html', ['module'], function(module) { module.exports = "<template><div textcontent.one-way=\"message\"></div><button type=\"button\" click.trigger=\"doSomething(message, $event)\">Click me</button> <input type=\"text\" ref=\"input1\"><div style.bind=\"styleString\">${input1.value}</div><p style.bind=\"styleObject\" repeat.for=\"[key, value] of mapCollection\">${key} - ${value}</p></template>"; });
+define('text!sideBar/sponsors.html', ['module'], function(module) { module.exports = "<template><div textcontent.one-way=\"message\"></div><button type=\"button\" click.trigger=\"doSomething(message, $event)\">Click me</button> <input type=\"text\" ref=\"input1\"><div style.bind=\"styleString\">${input1.value}</div><p style.bind=\"styleObject\" repeat.for=\"[key, value] of mapCollection\">${key} - ${value}</p><input type=\"text\" value.bind=\"person.firstName\"> <input type=\"text\" value.bind=\"person.lastName\"> ${person.fullName}</template>"; });
 //# sourceMappingURL=app-bundle.js.map

@@ -1,10 +1,29 @@
-export class Jobs {
-  constructor() {  }
+import {inject} from 'aurelia-framework';
+import {DataRepository} from './../services/dataRepository';
 
-  canActivate(params, routeConfig) {
-    let promise = new Promise((resolve, reject) => {
-      setTimeout(_ => resolve(false), 3000);
-    });
-    return promise;
+@inject(DataRepository)
+export class Jobs {
+  constructor(dataRepository) {
+    this.dataRepository = dataRepository;
   }
+
+  activate(params, routeConfig, navigationInstruction) {
+    this.jobs = [];
+    this.router = navigationInstruction.router;
+    return this.dataRepository.getJobs().then(jobs => {
+      console.log(jobs);
+      this.jobs = jobs;
+    });
+  }
+
+  addJob() {
+    this.router.navigateToRoute('addJob');
+  }
+
+  // canActivate(params, routeConfig) {
+  //   let promise = new Promise((resolve, reject) => {
+  //     setTimeout(_ => resolve(false), 3000);
+  //   });
+  //   return promise;
+  // }
 }
