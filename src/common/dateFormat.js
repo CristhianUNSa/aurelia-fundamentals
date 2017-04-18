@@ -1,8 +1,9 @@
 import moment from 'moment';
 
 export class DateFormatValueConverter {
-  toView(value) {
-    return moment(value).format('M/D/YYYY h:mm a');
+  toView(value, format) {
+    if (!format) format = 'M/D/YYYY h:mm a';
+    return moment(value).format(format);
   }
 
   fromView(value) {

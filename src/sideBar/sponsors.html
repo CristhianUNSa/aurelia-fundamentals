@@ -1,8 +1,8 @@
 <template>
     <div textcontent.one-way="message"></div>
     <button type="button" click.trigger="doSomething(message, $event)">Click me</button>
-    <input type="text" ref="input1" />
-    <div style.bind="styleString">${input1.value}</div>
+    <input type="text" ref="input1" placeholder="Search with debounce 200" />
+    <div style.bind="styleString">${input1.value & debounce: 200}</div>
     <p style.bind="styleObject" repeat.for="[key, value] of mapCollection">${key} - ${value}</p>
     
     <input type="text" value.bind="person.firstName" />
