@@ -18,7 +18,6 @@ function filterAndFormat(pastOrFuture, events) {
       return itemDateTimeMoment.isAfter(now);
     });
   }
-
   return results;
 }
 

@@ -157,12 +157,21 @@ define('shell',['exports', 'toastr'], function (exports, _toastr) {
     return NavToastStep;
   }();
 });
-define('discussion/discussion',['exports'], function (exports) {
+define('common/dateFormat',['exports', 'moment'], function (exports, _moment) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
     value: true
   });
+  exports.DateFormatValueConverter = undefined;
+
+  var _moment2 = _interopRequireDefault(_moment);
+
+  function _interopRequireDefault(obj) {
+    return obj && obj.__esModule ? obj : {
+      default: obj
+    };
+  }
 
   function _classCallCheck(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
@@ -170,137 +179,22 @@ define('discussion/discussion',['exports'], function (exports) {
     }
   }
 
-  function getDiscussionInput() {
-    return '';
-  }
-
-  function cloneObject(obj) {
-    return JSON.parse(JSON.stringify(obj));
-  }
-
-  var Discussion = exports.Discussion = function () {
-    function Discussion() {
-      _classCallCheck(this, Discussion);
+  var DateFormatValueConverter = exports.DateFormatValueConverter = function () {
+    function DateFormatValueConverter() {
+      _classCallCheck(this, DateFormatValueConverter);
     }
 
-    Discussion.prototype.activate = function activate() {
-      this.discussionInput = getDiscussionInput();
-      this.originalInput = cloneObject(this.discussionInput);
+    DateFormatValueConverter.prototype.toView = function toView(value, format) {
+      if (!format) format = 'M/D/YYYY h:mm a';
+      return (0, _moment2.default)(value).format(format);
     };
 
-    Discussion.prototype.save = function save() {
-      this.originalInput = cloneObject(this.discussionInput);
+    DateFormatValueConverter.prototype.fromView = function fromView(value) {
+      return new Date(value);
     };
 
-    Discussion.prototype.canDeactivate = function canDeactivate() {
-      if (JSON.stringify(cloneObject(this.discussionInput)) !== JSON.stringify(this.originalInput)) {
-        if (confirm('Unsaved data, are you sure you want to navigate away?')) {
-          return true;
-        } else {
-          return false;
-        }
-      } else {
-        return true;
-      }
-    };
-
-    return Discussion;
+    return DateFormatValueConverter;
   }();
-});
-define('jobs/addJob',['exports', 'aurelia-framework', 'services/dataRepository'], function (exports, _aureliaFramework, _dataRepository) {
-  'use strict';
-
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-  exports.AddJob = undefined;
-
-  function _classCallCheck(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-
-  var _dec, _class;
-
-  var AddJob = exports.AddJob = (_dec = (0, _aureliaFramework.inject)(_dataRepository.DataRepository), _dec(_class = function () {
-    function AddJob(dataRepository) {
-      var _this = this;
-
-      _classCallCheck(this, AddJob);
-
-      this.job = { jobType: 'Full Time', jobSkills: [] };
-      this.dataRepository = dataRepository;
-      this.dataRepository.getStates().then(function (states) {
-        _this.states = states;
-      });
-      this.dataRepository.getJobTypes().then(function (jobTypes) {
-        _this.jobTypes = jobTypes;
-      });
-      this.dataRepository.getJobSkills().then(function (jobSkills) {
-        _this.jobSkills = jobSkills;
-      });
-    }
-
-    AddJob.prototype.activate = function activate(params, routeConfig, navigationInstruction) {
-      this.router = navigationInstruction.router;
-    };
-
-    AddJob.prototype.save = function save() {
-      var _this2 = this;
-
-      if (this.job.needDate) {
-        this.job.needDate = new Date(this.job.needDate);
-      }
-      console.log(this.job);
-      this.dataRepository.addJob(this.job).then(function (job) {
-        return _this2.router.navigateToRoute('jobs');
-      });
-    };
-
-    return AddJob;
-  }()) || _class);
-});
-define('jobs/jobs',['exports', 'aurelia-framework', './../services/dataRepository'], function (exports, _aureliaFramework, _dataRepository) {
-  'use strict';
-
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-  exports.Jobs = undefined;
-
-  function _classCallCheck(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-
-  var _dec, _class;
-
-  var Jobs = exports.Jobs = (_dec = (0, _aureliaFramework.inject)(_dataRepository.DataRepository), _dec(_class = function () {
-    function Jobs(dataRepository) {
-      _classCallCheck(this, Jobs);
-
-      this.dataRepository = dataRepository;
-    }
-
-    Jobs.prototype.activate = function activate(params, routeConfig, navigationInstruction) {
-      var _this = this;
-
-      this.jobs = [];
-      this.router = navigationInstruction.router;
-      return this.dataRepository.getJobs().then(function (jobs) {
-        console.log(jobs);
-        _this.jobs = jobs;
-      });
-    };
-
-    Jobs.prototype.addJob = function addJob() {
-      this.router.navigateToRoute('addJob');
-    };
-
-    return Jobs;
-  }()) || _class);
 });
 define('events/eventDetail',['exports', 'aurelia-framework', 'services/dataRepository'], function (exports, _aureliaFramework, _dataRepository) {
   'use strict';
@@ -495,7 +389,6 @@ define('services/dataRepository',['exports', './eventsData', './jobsData', 'mome
         return itemDateTimeMoment.isAfter(now);
       });
     }
-
     return results;
   }
 
@@ -1106,21 +999,13 @@ define('sideBar/sponsors',['exports', 'aurelia-framework'], function (exports, _
     return Person;
   }(), (_applyDecoratedDescriptor(_class.prototype, 'fullName', [_dec], Object.getOwnPropertyDescriptor(_class.prototype, 'fullName'), _class.prototype)), _class));
 });
-define('common/dateFormat',['exports', 'moment'], function (exports, _moment) {
+define('jobs/addJob',['exports', 'aurelia-framework', 'services/dataRepository'], function (exports, _aureliaFramework, _dataRepository) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
     value: true
   });
-  exports.DateFormatValueConverter = undefined;
-
-  var _moment2 = _interopRequireDefault(_moment);
-
-  function _interopRequireDefault(obj) {
-    return obj && obj.__esModule ? obj : {
-      default: obj
-    };
-  }
+  exports.AddJob = undefined;
 
   function _classCallCheck(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
@@ -1128,20 +1013,135 @@ define('common/dateFormat',['exports', 'moment'], function (exports, _moment) {
     }
   }
 
-  var DateFormatValueConverter = exports.DateFormatValueConverter = function () {
-    function DateFormatValueConverter() {
-      _classCallCheck(this, DateFormatValueConverter);
+  var _dec, _class;
+
+  var AddJob = exports.AddJob = (_dec = (0, _aureliaFramework.inject)(_dataRepository.DataRepository), _dec(_class = function () {
+    function AddJob(dataRepository) {
+      var _this = this;
+
+      _classCallCheck(this, AddJob);
+
+      this.job = { jobType: 'Full Time', jobSkills: [] };
+      this.dataRepository = dataRepository;
+      this.dataRepository.getStates().then(function (states) {
+        _this.states = states;
+      });
+      this.dataRepository.getJobTypes().then(function (jobTypes) {
+        _this.jobTypes = jobTypes;
+      });
+      this.dataRepository.getJobSkills().then(function (jobSkills) {
+        _this.jobSkills = jobSkills;
+      });
     }
 
-    DateFormatValueConverter.prototype.toView = function toView(value) {
-      return (0, _moment2.default)(value).format('M/D/YYYY h:mm a');
+    AddJob.prototype.activate = function activate(params, routeConfig, navigationInstruction) {
+      this.router = navigationInstruction.router;
     };
 
-    DateFormatValueConverter.prototype.fromView = function fromView(value) {
-      return new Date(value);
+    AddJob.prototype.save = function save() {
+      var _this2 = this;
+
+      if (this.job.needDate) {
+        this.job.needDate = new Date(this.job.needDate);
+      }
+      console.log(this.job);
+      this.dataRepository.addJob(this.job).then(function (job) {
+        return _this2.router.navigateToRoute('jobs');
+      });
     };
 
-    return DateFormatValueConverter;
+    return AddJob;
+  }()) || _class);
+});
+define('jobs/jobs',['exports', 'aurelia-framework', './../services/dataRepository'], function (exports, _aureliaFramework, _dataRepository) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.Jobs = undefined;
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var _dec, _class;
+
+  var Jobs = exports.Jobs = (_dec = (0, _aureliaFramework.inject)(_dataRepository.DataRepository), _dec(_class = function () {
+    function Jobs(dataRepository) {
+      _classCallCheck(this, Jobs);
+
+      this.dataRepository = dataRepository;
+    }
+
+    Jobs.prototype.activate = function activate(params, routeConfig, navigationInstruction) {
+      var _this = this;
+
+      this.jobs = [];
+      this.router = navigationInstruction.router;
+      return this.dataRepository.getJobs().then(function (jobs) {
+        console.log(jobs);
+        _this.jobs = jobs;
+      });
+    };
+
+    Jobs.prototype.addJob = function addJob() {
+      this.router.navigateToRoute('addJob');
+    };
+
+    return Jobs;
+  }()) || _class);
+});
+define('discussion/discussion',['exports'], function (exports) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  function getDiscussionInput() {
+    return '';
+  }
+
+  function cloneObject(obj) {
+    return JSON.parse(JSON.stringify(obj));
+  }
+
+  var Discussion = exports.Discussion = function () {
+    function Discussion() {
+      _classCallCheck(this, Discussion);
+    }
+
+    Discussion.prototype.activate = function activate() {
+      this.discussionInput = getDiscussionInput();
+      this.originalInput = cloneObject(this.discussionInput);
+    };
+
+    Discussion.prototype.save = function save() {
+      this.originalInput = cloneObject(this.discussionInput);
+    };
+
+    Discussion.prototype.canDeactivate = function canDeactivate() {
+      if (JSON.stringify(cloneObject(this.discussionInput)) !== JSON.stringify(this.originalInput)) {
+        if (confirm('Unsaved data, are you sure you want to navigate away?')) {
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        return true;
+      }
+    };
+
+    return Discussion;
   }();
 });
 define('text!shell.html', ['module'], function(module) { module.exports = "<template><require from=\"bootstrap/css/bootstrap.css\"></require><require from=\"toastr/build/toastr.min.css\"></require><nav class=\"navbar navbar-default\"><div class=\"container\"><div class=\"navbar-header\"><button type=\"button\" class=\"navbar-toggle collapsed\" data-toggle=\"collapse\" data-target=\"#bs-example-navbar-collapse-1\" aria-expanded=\"false\"><span class=\"sr-only\">Toggle navigation</span> <span class=\"icon-bar\"></span> <span class=\"icon-bar\"></span> <span class=\"icon-bar\"></span></button> <a class=\"navbar-brand\" href=\"#\">Aurelia Fundamentals</a></div><div class=\"collapse navbar-collapse\" id=\"bs-example-navbar-collapse-1\"><ul class=\"nav navbar-nav\"><li repeat.for=\"route of router.navigation\" class=\"${route.isActive ? 'active' : ''}\"><a data-toggle=\"collapse\" data-target=\"#bs-example-navbar-collapse-1.in\" href.bind=\"route.href\">${route.title}</a></li></ul><ul class=\"nav navbar-nav navbar-right\"><li><i class=\"fa fa-cog fa-spin fa-3x\" style=\"margin:0 auto\" if.bind=\"router.isNavigating\"></i></li></ul></div></div></nav><div class=\"container\"><div class=\"col-xs-10\"><router-view name=\"mainContent\"></router-view></div><div class=\"col-xs-2\"><router-view name=\"sideBar\"></router-view></div></div></template>"; });
@@ -1151,8 +1151,8 @@ define('text!events/eventDetail.html', ['module'], function(module) { module.exp
 define('text!events/events.html', ['module'], function(module) { module.exports = "<template><style type=\"text/css\">.nav-tabs li a{font-size:20px}</style><ul class=\"nav nav-tabs\"><li repeat.for=\"route of router.navigation\" class=\"${route.isActive ? 'active' : '' }\"><a href.bind=\"route.href\">${route.title}</a></li></ul><router-view></router-view></template>"; });
 define('text!events/eventsList.html', ['module'], function(module) { module.exports = "<template><div repeat.for=\"event of events\"><compose model.bind=\"event\" view=\"./event.html\"></compose></div><button type=\"button\" click.trigger=\"goToDiscussion()\">Go to discussion</button></template>"; });
 define('text!events/past.html', ['module'], function(module) { module.exports = "<template>Past Events</template>"; });
-define('text!jobs/addJob.html', ['module'], function(module) { module.exports = "<template><form submit.delegate=\"save()\"><div class=\"form-group\"><label for=\"title\">Title</label><input type=\"text\" value.bind=\"job.title\" class=\"form-control\" id=\"title\" placeholder=\"Title\"></div><div class=\"form-group\"><label for=\"description\">Description</label><textarea value.bind=\"job.description\" class=\"form-control\" id=\"description\" placeholder=\"Description\" rows=\"5\"></textarea></div><div class=\"form-group\"><label for=\"needDate\">Need Date</label><input type=\"text\" id=\"needDate\" value.bind=\"job.needDate | dateFormat & updateTrigger:'blur'\" placeholder=\"Need Date\"></div><div class=\"form-group\"><label for=\"jobType\">Job Type:</label><label repeat.for=\"jobType of jobTypes\"><input type=\"radio\" name=\"jobType\" value.bind=\"jobType\" checked.bind=\"$parent.job.jobType\"> ${jobType}</label></div><div class=\"form-group\"><label>Job Skills:</label><label repeat.for=\"jobSkill of jobSkills\"><input type=\"checkbox\" value.bind=\"jobSkill\" checked.bind=\"$parent.job.jobSkills\"> ${jobSkill}</label></div><div class=\"form-group\"><label for=\"city\">City</label><input type=\"text\" id=\"city\" value.bind=\"job.location.city\" placeholder=\"City\"></div><div class=\"form-group\"><label for=\"state\">State</label><select id=\"state\" value.bind=\"job.location.state\"><option>Select State</option><option repeat.for=\"state of states\" model.bind=\"state.abbreviation\">${state.name} (${state.abbreviation})</option></select></div><button type=\"submit\" class=\"btn btn-primary\">Save</button></form></template>"; });
-define('text!jobs/jobs.html', ['module'], function(module) { module.exports = "<template><h3>Job Listings</h3><button type=\"button\" click.delegate=\"addJob()\"><img src=\"images/Add-New.png\"></button><table class=\"table table-striped\"><thead><tr><th>Title</th><th>Need Date</th><th>Location</th><th>Technologies</th></tr></thead><tbody><tr repeat.for=\"job of jobs\"><td>${job.title}</td><td>${job.needDate | dateFormat}</td><td>${job.location.city},${job.location.state}</td><td>${job.jobSkills.join(', ')}</td></tr></tbody></table></template>"; });
+define('text!jobs/addJob.html', ['module'], function(module) { module.exports = "<template><form submit.delegate=\"save()\"><div class=\"form-group\"><label for=\"title\">Title</label><input type=\"text\" value.bind=\"job.title\" class=\"form-control\" id=\"title\" placeholder=\"Title\"></div><div class=\"form-group\"><label for=\"description\">Description</label><textarea value.bind=\"job.description\" class=\"form-control\" id=\"description\" placeholder=\"Description\" rows=\"5\"></textarea></div><div class=\"form-group\"><label for=\"needDate\">Need Date</label><input type=\"text\" id=\"needDate\" value.bind=\"job.needDate | dateFormat : 'MM/YYYY' & updateTrigger:'blur'\" placeholder=\"Need Date\"></div><div class=\"form-group\"><label for=\"jobType\">Job Type:</label><label repeat.for=\"jobType of jobTypes\"><input type=\"radio\" name=\"jobType\" value.bind=\"jobType\" checked.bind=\"$parent.job.jobType\"> ${jobType}</label></div><div class=\"form-group\"><label>Job Skills:</label><label repeat.for=\"jobSkill of jobSkills\"><input type=\"checkbox\" value.bind=\"jobSkill\" checked.bind=\"$parent.job.jobSkills\"> ${jobSkill}</label></div><div class=\"form-group\"><label for=\"city\">City</label><input type=\"text\" id=\"city\" value.bind=\"job.location.city\" placeholder=\"City\"></div><div class=\"form-group\"><label for=\"state\">State</label><select id=\"state\" value.bind=\"job.location.state\"><option>Select State</option><option repeat.for=\"state of states\" model.bind=\"state.abbreviation\">${state.name} (${state.abbreviation})</option></select></div><button type=\"submit\" class=\"btn btn-primary\">Save</button></form></template>"; });
+define('text!jobs/jobs.html', ['module'], function(module) { module.exports = "<template><h3>Job Listings</h3><button type=\"button\" click.delegate=\"addJob()\"><img src=\"images/Add-New.png\"></button><table class=\"table table-striped\"><thead><tr><th>Title</th><th>Need Date</th><th>Location</th><th>Technologies</th></tr></thead><tbody><tr repeat.for=\"job of jobs\"><td>${job.title}</td><td>${job.needDate | dateFormat : 'MM/YYYY'}</td><td>${job.location.city},${job.location.state}</td><td>${job.jobSkills.join(', ')}</td></tr></tbody></table></template>"; });
 define('text!sideBar/ads.html', ['module'], function(module) { module.exports = "<template>Ads</template>"; });
-define('text!sideBar/sponsors.html', ['module'], function(module) { module.exports = "<template><div textcontent.one-way=\"message\"></div><button type=\"button\" click.trigger=\"doSomething(message, $event)\">Click me</button> <input type=\"text\" ref=\"input1\"><div style.bind=\"styleString\">${input1.value}</div><p style.bind=\"styleObject\" repeat.for=\"[key, value] of mapCollection\">${key} - ${value}</p><input type=\"text\" value.bind=\"person.firstName\"> <input type=\"text\" value.bind=\"person.lastName\"> ${person.fullName}</template>"; });
+define('text!sideBar/sponsors.html', ['module'], function(module) { module.exports = "<template><div textcontent.one-way=\"message\"></div><button type=\"button\" click.trigger=\"doSomething(message, $event)\">Click me</button> <input type=\"text\" ref=\"input1\" placeholder=\"Search with debounce 200\"><div style.bind=\"styleString\">${input1.value & debounce: 200}</div><p style.bind=\"styleObject\" repeat.for=\"[key, value] of mapCollection\">${key} - ${value}</p><input type=\"text\" value.bind=\"person.firstName\"> <input type=\"text\" value.bind=\"person.lastName\"> ${person.fullName}</template>"; });
 //# sourceMappingURL=app-bundle.js.map
