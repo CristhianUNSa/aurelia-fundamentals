@@ -161,7 +161,14 @@
             "resources": [
               "build/toastr.min.css"
             ],
-            "deps": ["jquery"]
+            "deps": [
+              "jquery"
+            ]
+          },
+          {
+            "name": "aurelia-http-client",
+            "main": "aurelia-http-client",
+            "path": "../node_modules/aurelia-http-client/dist/amd"
           }
         ]
       }

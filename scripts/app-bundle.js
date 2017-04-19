@@ -46,6 +46,7 @@ define('main',['exports', './environment'], function (exports, _environment) {
   }
 
   function configure(aurelia) {
+    aurelia.use.instance('apiRoot', 'http://brianapidemos.azurewebsites.net/CommunityApi/');
     aurelia.use.globalResources('common/dateFormat');
     aurelia.use.standardConfiguration().feature('resources');
 
@@ -196,6 +197,56 @@ define('common/dateFormat',['exports', 'moment'], function (exports, _moment) {
     return DateFormatValueConverter;
   }();
 });
+define('discussion/discussion',['exports'], function (exports) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  function getDiscussionInput() {
+    return '';
+  }
+
+  function cloneObject(obj) {
+    return JSON.parse(JSON.stringify(obj));
+  }
+
+  var Discussion = exports.Discussion = function () {
+    function Discussion() {
+      _classCallCheck(this, Discussion);
+    }
+
+    Discussion.prototype.activate = function activate() {
+      this.discussionInput = getDiscussionInput();
+      this.originalInput = cloneObject(this.discussionInput);
+    };
+
+    Discussion.prototype.save = function save() {
+      this.originalInput = cloneObject(this.discussionInput);
+    };
+
+    Discussion.prototype.canDeactivate = function canDeactivate() {
+      if (JSON.stringify(cloneObject(this.discussionInput)) !== JSON.stringify(this.originalInput)) {
+        if (confirm('Unsaved data, are you sure you want to navigate away?')) {
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        return true;
+      }
+    };
+
+    return Discussion;
+  }();
+});
 define('events/eventDetail',['exports', 'aurelia-framework', 'services/dataRepository'], function (exports, _aureliaFramework, _dataRepository) {
   'use strict';
 
@@ -343,6 +394,101 @@ define('events/past',["exports"], function (exports) {
     _classCallCheck(this, Past);
   };
 });
+define('jobs/addJob',['exports', 'aurelia-framework', 'services/dataRepository'], function (exports, _aureliaFramework, _dataRepository) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.AddJob = undefined;
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var _dec, _class;
+
+  var AddJob = exports.AddJob = (_dec = (0, _aureliaFramework.inject)(_dataRepository.DataRepository), _dec(_class = function () {
+    function AddJob(dataRepository) {
+      var _this = this;
+
+      _classCallCheck(this, AddJob);
+
+      this.job = { jobType: 'Full Time', jobSkills: [] };
+      this.dataRepository = dataRepository;
+      this.dataRepository.getStates().then(function (states) {
+        _this.states = states;
+      });
+      this.dataRepository.getJobTypes().then(function (jobTypes) {
+        _this.jobTypes = jobTypes;
+      });
+      this.dataRepository.getJobSkills().then(function (jobSkills) {
+        _this.jobSkills = jobSkills;
+      });
+    }
+
+    AddJob.prototype.activate = function activate(params, routeConfig, navigationInstruction) {
+      this.router = navigationInstruction.router;
+    };
+
+    AddJob.prototype.save = function save() {
+      var _this2 = this;
+
+      if (this.job.needDate) {
+        this.job.needDate = new Date(this.job.needDate);
+      }
+      console.log(this.job);
+      this.dataRepository.addJob(this.job).then(function (job) {
+        return _this2.router.navigateToRoute('jobs');
+      });
+    };
+
+    return AddJob;
+  }()) || _class);
+});
+define('jobs/jobs',['exports', 'aurelia-framework', './../services/dataRepository'], function (exports, _aureliaFramework, _dataRepository) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.Jobs = undefined;
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var _dec, _class;
+
+  var Jobs = exports.Jobs = (_dec = (0, _aureliaFramework.inject)(_dataRepository.DataRepository), _dec(_class = function () {
+    function Jobs(dataRepository) {
+      _classCallCheck(this, Jobs);
+
+      this.dataRepository = dataRepository;
+    }
+
+    Jobs.prototype.activate = function activate(params, routeConfig, navigationInstruction) {
+      var _this = this;
+
+      this.jobs = [];
+      this.router = navigationInstruction.router;
+      return this.dataRepository.getJobs().then(function (jobs) {
+        console.log(jobs);
+        _this.jobs = jobs;
+      });
+    };
+
+    Jobs.prototype.addJob = function addJob() {
+      this.router.navigateToRoute('addJob');
+    };
+
+    return Jobs;
+  }()) || _class);
+});
 define('resources/index',["exports"], function (exports) {
   "use strict";
 
@@ -352,7 +498,7 @@ define('resources/index',["exports"], function (exports) {
   exports.configure = configure;
   function configure(config) {}
 });
-define('services/dataRepository',['exports', './eventsData', './jobsData', 'moment'], function (exports, _eventsData, _jobsData, _moment) {
+define('services/dataRepository',['exports', 'aurelia-framework', './jobsData', 'moment', 'aurelia-http-client'], function (exports, _aureliaFramework, _jobsData, _moment, _aureliaHttpClient) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
@@ -374,6 +520,8 @@ define('services/dataRepository',['exports', './eventsData', './jobsData', 'mome
     }
   }
 
+  var _dec, _class;
+
   function filterAndFormat(pastOrFuture, events) {
     var results = JSON.parse(JSON.stringify(events));
     if (pastOrFuture === 'past') {
@@ -392,9 +540,12 @@ define('services/dataRepository',['exports', './eventsData', './jobsData', 'mome
     return results;
   }
 
-  var DataRepository = exports.DataRepository = function () {
-    function DataRepository() {
+  var DataRepository = exports.DataRepository = (_dec = (0, _aureliaFramework.inject)(_aureliaHttpClient.HttpClient, 'apiRoot'), _dec(_class = function () {
+    function DataRepository(httpClient, apiRoot) {
       _classCallCheck(this, DataRepository);
+
+      this.httpClient = httpClient;
+      this.apiRoot = apiRoot;
     }
 
     DataRepository.prototype.getEvents = function getEvents(pastOrFuture) {
@@ -402,14 +553,13 @@ define('services/dataRepository',['exports', './eventsData', './jobsData', 'mome
 
       var promise = new Promise(function (resolve, reject) {
         if (!_this.events) {
-          setTimeout(function (_) {
-            _this.events = _eventsData.eventsData;
-            var sorted = _this.events.sort(function (a, b) {
-              a.dateTime >= b.dateTime ? 1 : -1;
+          _this.httpClient.get(_this.apiRoot + 'api/Events').then(function (result) {
+            var data = JSON.parse(result.response);
+            _this.events = data.sort(function (a, b) {
+              return a.dateTime >= b.dateTime ? 1 : -1;
             });
-            _this.events = sorted;
             resolve(filterAndFormat(pastOrFuture, _this.events));
-          }, 60);
+          });
         } else {
           resolve(filterAndFormat(pastOrFuture, _this.events));
         }
@@ -485,7 +635,7 @@ define('services/dataRepository',['exports', './eventsData', './jobsData', 'mome
     };
 
     return DataRepository;
-  }();
+  }()) || _class);
 });
 define('services/eventsData',["exports"], function (exports) {
   "use strict";
@@ -998,151 +1148,6 @@ define('sideBar/sponsors',['exports', 'aurelia-framework'], function (exports, _
 
     return Person;
   }(), (_applyDecoratedDescriptor(_class.prototype, 'fullName', [_dec], Object.getOwnPropertyDescriptor(_class.prototype, 'fullName'), _class.prototype)), _class));
-});
-define('jobs/addJob',['exports', 'aurelia-framework', 'services/dataRepository'], function (exports, _aureliaFramework, _dataRepository) {
-  'use strict';
-
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-  exports.AddJob = undefined;
-
-  function _classCallCheck(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-
-  var _dec, _class;
-
-  var AddJob = exports.AddJob = (_dec = (0, _aureliaFramework.inject)(_dataRepository.DataRepository), _dec(_class = function () {
-    function AddJob(dataRepository) {
-      var _this = this;
-
-      _classCallCheck(this, AddJob);
-
-      this.job = { jobType: 'Full Time', jobSkills: [] };
-      this.dataRepository = dataRepository;
-      this.dataRepository.getStates().then(function (states) {
-        _this.states = states;
-      });
-      this.dataRepository.getJobTypes().then(function (jobTypes) {
-        _this.jobTypes = jobTypes;
-      });
-      this.dataRepository.getJobSkills().then(function (jobSkills) {
-        _this.jobSkills = jobSkills;
-      });
-    }
-
-    AddJob.prototype.activate = function activate(params, routeConfig, navigationInstruction) {
-      this.router = navigationInstruction.router;
-    };
-
-    AddJob.prototype.save = function save() {
-      var _this2 = this;
-
-      if (this.job.needDate) {
-        this.job.needDate = new Date(this.job.needDate);
-      }
-      console.log(this.job);
-      this.dataRepository.addJob(this.job).then(function (job) {
-        return _this2.router.navigateToRoute('jobs');
-      });
-    };
-
-    return AddJob;
-  }()) || _class);
-});
-define('jobs/jobs',['exports', 'aurelia-framework', './../services/dataRepository'], function (exports, _aureliaFramework, _dataRepository) {
-  'use strict';
-
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-  exports.Jobs = undefined;
-
-  function _classCallCheck(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-
-  var _dec, _class;
-
-  var Jobs = exports.Jobs = (_dec = (0, _aureliaFramework.inject)(_dataRepository.DataRepository), _dec(_class = function () {
-    function Jobs(dataRepository) {
-      _classCallCheck(this, Jobs);
-
-      this.dataRepository = dataRepository;
-    }
-
-    Jobs.prototype.activate = function activate(params, routeConfig, navigationInstruction) {
-      var _this = this;
-
-      this.jobs = [];
-      this.router = navigationInstruction.router;
-      return this.dataRepository.getJobs().then(function (jobs) {
-        console.log(jobs);
-        _this.jobs = jobs;
-      });
-    };
-
-    Jobs.prototype.addJob = function addJob() {
-      this.router.navigateToRoute('addJob');
-    };
-
-    return Jobs;
-  }()) || _class);
-});
-define('discussion/discussion',['exports'], function (exports) {
-  'use strict';
-
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-
-  function _classCallCheck(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-
-  function getDiscussionInput() {
-    return '';
-  }
-
-  function cloneObject(obj) {
-    return JSON.parse(JSON.stringify(obj));
-  }
-
-  var Discussion = exports.Discussion = function () {
-    function Discussion() {
-      _classCallCheck(this, Discussion);
-    }
-
-    Discussion.prototype.activate = function activate() {
-      this.discussionInput = getDiscussionInput();
-      this.originalInput = cloneObject(this.discussionInput);
-    };
-
-    Discussion.prototype.save = function save() {
-      this.originalInput = cloneObject(this.discussionInput);
-    };
-
-    Discussion.prototype.canDeactivate = function canDeactivate() {
-      if (JSON.stringify(cloneObject(this.discussionInput)) !== JSON.stringify(this.originalInput)) {
-        if (confirm('Unsaved data, are you sure you want to navigate away?')) {
-          return true;
-        } else {
-          return false;
-        }
-      } else {
-        return true;
-      }
-    };
-
-    return Discussion;
-  }();
 });
 define('text!shell.html', ['module'], function(module) { module.exports = "<template><require from=\"bootstrap/css/bootstrap.css\"></require><require from=\"toastr/build/toastr.min.css\"></require><nav class=\"navbar navbar-default\"><div class=\"container\"><div class=\"navbar-header\"><button type=\"button\" class=\"navbar-toggle collapsed\" data-toggle=\"collapse\" data-target=\"#bs-example-navbar-collapse-1\" aria-expanded=\"false\"><span class=\"sr-only\">Toggle navigation</span> <span class=\"icon-bar\"></span> <span class=\"icon-bar\"></span> <span class=\"icon-bar\"></span></button> <a class=\"navbar-brand\" href=\"#\">Aurelia Fundamentals</a></div><div class=\"collapse navbar-collapse\" id=\"bs-example-navbar-collapse-1\"><ul class=\"nav navbar-nav\"><li repeat.for=\"route of router.navigation\" class=\"${route.isActive ? 'active' : ''}\"><a data-toggle=\"collapse\" data-target=\"#bs-example-navbar-collapse-1.in\" href.bind=\"route.href\">${route.title}</a></li></ul><ul class=\"nav navbar-nav navbar-right\"><li><i class=\"fa fa-cog fa-spin fa-3x\" style=\"margin:0 auto\" if.bind=\"router.isNavigating\"></i></li></ul></div></div></nav><div class=\"container\"><div class=\"col-xs-10\"><router-view name=\"mainContent\"></router-view></div><div class=\"col-xs-2\"><router-view name=\"sideBar\"></router-view></div></div></template>"; });
 define('text!discussion/discussion.html', ['module'], function(module) { module.exports = "<template>Discussion input: <input type=\"text\" value.bind=\"discussionInput\"><br><button type=\"button\" click.delegate=\"save()\">Save</button></template>"; });

@@ -1,7 +1,7 @@
-import {eventsData} from './eventsData';
+import {inject} from 'aurelia-framework';
 import {jobsData, states, jobTypes, jobSkills} from './jobsData';
 import moment from 'moment';
-
+import {HttpClient} from 'aurelia-http-client';
 
 function filterAndFormat(pastOrFuture, events) {
   let results = JSON.parse(JSON.stringify(events));
@@ -21,20 +21,23 @@ function filterAndFormat(pastOrFuture, events) {
   return results;
 }
 
+@inject(HttpClient, 'apiRoot')
 export class DataRepository {
-  constructor()   {  }
+  constructor(httpClient, apiRoot)   {
+    this.httpClient = httpClient;
+    this.apiRoot = apiRoot;
+  }
 
   getEvents(pastOrFuture) {
     let promise = new Promise((resolve, reject) => {
       if (!this.events) {
-        setTimeout(_ => {
-          this.events = eventsData;
-          let sorted = this.events.sort((a, b) => {
-            a.dateTime >= b.dateTime ? 1 : -1;
-          });
-          this.events = sorted;
+        this.httpClient.get(this.apiRoot + 'api/Events')
+        .then(result => {
+          let data = JSON.parse(result.response);
+          this.events = data.sort((a, b) =>
+            a.dateTime >= b.dateTime ? 1 : -1);
           resolve(filterAndFormat(pastOrFuture, this.events));
-        }, 60);
+        });
       } else {
         resolve(filterAndFormat(pastOrFuture, this.events));
       }
