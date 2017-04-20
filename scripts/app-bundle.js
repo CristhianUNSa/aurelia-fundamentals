@@ -171,6 +171,263 @@ define('shell',['exports', 'toastr', 'aurelia-event-aggregator', 'common/Notific
     return NavToastStep;
   }();
 });
+define('common/bootstrap-form-renderer',['exports', 'aurelia-validation'], function (exports, _aureliaValidation) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.BootstrapFormRenderer = undefined;
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var BootstrapFormRenderer = exports.BootstrapFormRenderer = function () {
+    function BootstrapFormRenderer() {
+      _classCallCheck(this, BootstrapFormRenderer);
+    }
+
+    BootstrapFormRenderer.prototype.render = function render(instruction) {
+      for (var _iterator = instruction.unrender, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+        var _ref2;
+
+        if (_isArray) {
+          if (_i >= _iterator.length) break;
+          _ref2 = _iterator[_i++];
+        } else {
+          _i = _iterator.next();
+          if (_i.done) break;
+          _ref2 = _i.value;
+        }
+
+        var _ref5 = _ref2;
+        var result = _ref5.result,
+            elements = _ref5.elements;
+
+        for (var _iterator3 = elements, _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
+          var _ref6;
+
+          if (_isArray3) {
+            if (_i3 >= _iterator3.length) break;
+            _ref6 = _iterator3[_i3++];
+          } else {
+            _i3 = _iterator3.next();
+            if (_i3.done) break;
+            _ref6 = _i3.value;
+          }
+
+          var element = _ref6;
+
+          this.remove(element, result);
+        }
+      }
+
+      for (var _iterator2 = instruction.render, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
+        var _ref4;
+
+        if (_isArray2) {
+          if (_i2 >= _iterator2.length) break;
+          _ref4 = _iterator2[_i2++];
+        } else {
+          _i2 = _iterator2.next();
+          if (_i2.done) break;
+          _ref4 = _i2.value;
+        }
+
+        var _ref7 = _ref4;
+        var result = _ref7.result,
+            elements = _ref7.elements;
+
+        for (var _iterator4 = elements, _isArray4 = Array.isArray(_iterator4), _i4 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator]();;) {
+          var _ref8;
+
+          if (_isArray4) {
+            if (_i4 >= _iterator4.length) break;
+            _ref8 = _iterator4[_i4++];
+          } else {
+            _i4 = _iterator4.next();
+            if (_i4.done) break;
+            _ref8 = _i4.value;
+          }
+
+          var _element = _ref8;
+
+          this.add(_element, result);
+        }
+      }
+    };
+
+    BootstrapFormRenderer.prototype.add = function add(element, result) {
+      if (result.valid) {
+        return;
+      }
+
+      var formGroup = element.closest('.form-group');
+      if (!formGroup) {
+        return;
+      }
+
+      formGroup.classList.add('has-error');
+
+      var message = document.createElement('span');
+      message.className = 'help-block validation-message';
+      message.textContent = result.message;
+      message.id = 'validation-message-' + result.id;
+      formGroup.appendChild(message);
+    };
+
+    BootstrapFormRenderer.prototype.remove = function remove(element, result) {
+      if (result.valid) {
+        return;
+      }
+
+      var formGroup = element.closest('.form-group');
+      if (!formGroup) {
+        return;
+      }
+
+      var message = formGroup.querySelector('#validation-message-' + result.id);
+      if (message) {
+        formGroup.removeChild(message);
+
+        if (formGroup.querySelectorAll('.help-block.validation-message').length === 0) {
+          formGroup.classList.remove('has-error');
+        }
+      }
+    };
+
+    return BootstrapFormRenderer;
+  }();
+});
+define('common/dateFormat',['exports', 'moment'], function (exports, _moment) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.DateFormatValueConverter = undefined;
+
+  var _moment2 = _interopRequireDefault(_moment);
+
+  function _interopRequireDefault(obj) {
+    return obj && obj.__esModule ? obj : {
+      default: obj
+    };
+  }
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var DateFormatValueConverter = exports.DateFormatValueConverter = function () {
+    function DateFormatValueConverter() {
+      _classCallCheck(this, DateFormatValueConverter);
+    }
+
+    DateFormatValueConverter.prototype.toView = function toView(value, format) {
+      if (!format) format = 'M/D/YYYY h:mm a';
+      return (0, _moment2.default)(value).format(format);
+    };
+
+    DateFormatValueConverter.prototype.fromView = function fromView(value) {
+      return new Date(value);
+    };
+
+    return DateFormatValueConverter;
+  }();
+});
+define('common/nav-bar',['exports', 'aurelia-framework'], function (exports, _aureliaFramework) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.NavBar = undefined;
+
+  function _initDefineProp(target, property, descriptor, context) {
+    if (!descriptor) return;
+    Object.defineProperty(target, property, {
+      enumerable: descriptor.enumerable,
+      configurable: descriptor.configurable,
+      writable: descriptor.writable,
+      value: descriptor.initializer ? descriptor.initializer.call(context) : void 0
+    });
+  }
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  function _applyDecoratedDescriptor(target, property, decorators, descriptor, context) {
+    var desc = {};
+    Object['ke' + 'ys'](descriptor).forEach(function (key) {
+      desc[key] = descriptor[key];
+    });
+    desc.enumerable = !!desc.enumerable;
+    desc.configurable = !!desc.configurable;
+
+    if ('value' in desc || desc.initializer) {
+      desc.writable = true;
+    }
+
+    desc = decorators.slice().reverse().reduce(function (desc, decorator) {
+      return decorator(target, property, desc) || desc;
+    }, desc);
+
+    if (context && desc.initializer !== void 0) {
+      desc.value = desc.initializer ? desc.initializer.call(context) : void 0;
+      desc.initializer = undefined;
+    }
+
+    if (desc.initializer === void 0) {
+      Object['define' + 'Property'](target, property, desc);
+      desc = null;
+    }
+
+    return desc;
+  }
+
+  function _initializerWarningHelper(descriptor, context) {
+    throw new Error('Decorating class property failed. Please ensure that transform-class-properties is enabled.');
+  }
+
+  var _desc, _value, _class, _descriptor;
+
+  var NavBar = exports.NavBar = (_class = function NavBar() {
+    _classCallCheck(this, NavBar);
+
+    _initDefineProp(this, 'router', _descriptor, this);
+  }, (_descriptor = _applyDecoratedDescriptor(_class.prototype, 'router', [_aureliaFramework.bindable], {
+    enumerable: true,
+    initializer: null
+  })), _class);
+});
+define('common/NotificationPayload',["exports"], function (exports) {
+  "use strict";
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var NotificationPayload = exports.NotificationPayload = function NotificationPayload(time) {
+    _classCallCheck(this, NotificationPayload);
+
+    this.time = time;
+  };
+});
 define('discussion/discussion',['exports'], function (exports) {
   'use strict';
 
@@ -220,151 +477,6 @@ define('discussion/discussion',['exports'], function (exports) {
 
     return Discussion;
   }();
-});
-define('common/dateFormat',['exports', 'moment'], function (exports, _moment) {
-  'use strict';
-
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-  exports.DateFormatValueConverter = undefined;
-
-  var _moment2 = _interopRequireDefault(_moment);
-
-  function _interopRequireDefault(obj) {
-    return obj && obj.__esModule ? obj : {
-      default: obj
-    };
-  }
-
-  function _classCallCheck(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-
-  var DateFormatValueConverter = exports.DateFormatValueConverter = function () {
-    function DateFormatValueConverter() {
-      _classCallCheck(this, DateFormatValueConverter);
-    }
-
-    DateFormatValueConverter.prototype.toView = function toView(value, format) {
-      if (!format) format = 'M/D/YYYY h:mm a';
-      return (0, _moment2.default)(value).format(format);
-    };
-
-    DateFormatValueConverter.prototype.fromView = function fromView(value) {
-      return new Date(value);
-    };
-
-    return DateFormatValueConverter;
-  }();
-});
-define('jobs/addJob',['exports', 'aurelia-framework', 'services/dataRepository', 'aurelia-validation', 'common/bootstrap-form-renderer'], function (exports, _aureliaFramework, _dataRepository, _aureliaValidation, _bootstrapFormRenderer) {
-  'use strict';
-
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-  exports.AddJob = undefined;
-
-  function _classCallCheck(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-
-  var _dec, _class;
-
-  var AddJob = exports.AddJob = (_dec = (0, _aureliaFramework.inject)(_dataRepository.DataRepository, _aureliaValidation.ValidationController), _dec(_class = function () {
-    function AddJob(dataRepository, controller) {
-      var _this = this;
-
-      _classCallCheck(this, AddJob);
-
-      this.job = { jobType: 'Full Time', jobSkills: [] };
-      this.dataRepository = dataRepository;
-      this.dataRepository.getStates().then(function (states) {
-        _this.states = states;
-      });
-      this.dataRepository.getJobTypes().then(function (jobTypes) {
-        _this.jobTypes = jobTypes;
-      });
-      this.dataRepository.getJobSkills().then(function (jobSkills) {
-        _this.jobSkills = jobSkills;
-      });
-      this.controller = controller;
-      this.controller.validateTrigger = _aureliaValidation.validateTrigger.change;
-      this.controller.addRenderer(new _bootstrapFormRenderer.BootstrapFormRenderer());
-
-      _aureliaValidation.ValidationRules.customRule('notCEO', function (value, object) {
-        return value.toUpperCase() !== 'CEO';
-      }, 'Buen intento, el ${$displayName} no puede ser ${$value}');
-
-      _aureliaValidation.ValidationRules.ensure(function (j) {
-        return j.title;
-      }).required().minLength(3).satisfiesRule('notCEO').on(this.job);
-    }
-
-    AddJob.prototype.activate = function activate(params, routeConfig, navigationInstruction) {
-      this.router = navigationInstruction.router;
-    };
-
-    AddJob.prototype.save = function save() {
-      var _this2 = this;
-
-      if (this.controller.errors && this.controller.errors.length > 0) return;
-      if (this.job.needDate) {
-        this.job.needDate = new Date(this.job.needDate);
-      }
-      this.dataRepository.addJob(this.job).then(function (job) {
-        return _this2.router.navigateToRoute('jobs');
-      });
-    };
-
-    return AddJob;
-  }()) || _class);
-});
-define('jobs/jobs',['exports', 'aurelia-framework', './../services/dataRepository'], function (exports, _aureliaFramework, _dataRepository) {
-  'use strict';
-
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-  exports.Jobs = undefined;
-
-  function _classCallCheck(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-
-  var _dec, _class;
-
-  var Jobs = exports.Jobs = (_dec = (0, _aureliaFramework.inject)(_dataRepository.DataRepository), _dec(_class = function () {
-    function Jobs(dataRepository) {
-      _classCallCheck(this, Jobs);
-
-      this.dataRepository = dataRepository;
-    }
-
-    Jobs.prototype.activate = function activate(params, routeConfig, navigationInstruction) {
-      var _this = this;
-
-      this.jobs = [];
-      this.router = navigationInstruction.router;
-      return this.dataRepository.getJobs().then(function (jobs) {
-        console.log(jobs);
-        _this.jobs = jobs;
-      });
-    };
-
-    Jobs.prototype.addJob = function addJob() {
-      this.router.navigateToRoute('addJob');
-    };
-
-    return Jobs;
-  }()) || _class);
 });
 define('events/EditDialog',['exports', 'aurelia-dialog', 'aurelia-framework'], function (exports, _aureliaDialog, _aureliaFramework) {
   'use strict';
@@ -563,6 +675,112 @@ define('events/past',["exports"], function (exports) {
   var Past = exports.Past = function Past() {
     _classCallCheck(this, Past);
   };
+});
+define('jobs/addJob',['exports', 'aurelia-framework', 'services/dataRepository', 'aurelia-validation', 'common/bootstrap-form-renderer'], function (exports, _aureliaFramework, _dataRepository, _aureliaValidation, _bootstrapFormRenderer) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.AddJob = undefined;
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var _dec, _class;
+
+  var AddJob = exports.AddJob = (_dec = (0, _aureliaFramework.inject)(_dataRepository.DataRepository, _aureliaValidation.ValidationController), _dec(_class = function () {
+    function AddJob(dataRepository, controller) {
+      var _this = this;
+
+      _classCallCheck(this, AddJob);
+
+      this.job = { jobType: 'Full Time', jobSkills: [] };
+      this.dataRepository = dataRepository;
+      this.dataRepository.getStates().then(function (states) {
+        _this.states = states;
+      });
+      this.dataRepository.getJobTypes().then(function (jobTypes) {
+        _this.jobTypes = jobTypes;
+      });
+      this.dataRepository.getJobSkills().then(function (jobSkills) {
+        _this.jobSkills = jobSkills;
+      });
+      this.controller = controller;
+      this.controller.validateTrigger = _aureliaValidation.validateTrigger.change;
+      this.controller.addRenderer(new _bootstrapFormRenderer.BootstrapFormRenderer());
+
+      _aureliaValidation.ValidationRules.customRule('notCEO', function (value, object) {
+        return value.toUpperCase() !== 'CEO';
+      }, 'Buen intento, el ${$displayName} no puede ser ${$value}');
+
+      _aureliaValidation.ValidationRules.ensure(function (j) {
+        return j.title;
+      }).required().minLength(3).satisfiesRule('notCEO').on(this.job);
+    }
+
+    AddJob.prototype.activate = function activate(params, routeConfig, navigationInstruction) {
+      this.router = navigationInstruction.router;
+    };
+
+    AddJob.prototype.save = function save() {
+      var _this2 = this;
+
+      if (this.controller.errors && this.controller.errors.length > 0) return;
+      if (this.job.needDate) {
+        this.job.needDate = new Date(this.job.needDate);
+      }
+      this.dataRepository.addJob(this.job).then(function (job) {
+        return _this2.router.navigateToRoute('jobs');
+      });
+    };
+
+    return AddJob;
+  }()) || _class);
+});
+define('jobs/jobs',['exports', 'aurelia-framework', './../services/dataRepository'], function (exports, _aureliaFramework, _dataRepository) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.Jobs = undefined;
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var _dec, _class;
+
+  var Jobs = exports.Jobs = (_dec = (0, _aureliaFramework.inject)(_dataRepository.DataRepository), _dec(_class = function () {
+    function Jobs(dataRepository) {
+      _classCallCheck(this, Jobs);
+
+      this.dataRepository = dataRepository;
+    }
+
+    Jobs.prototype.activate = function activate(params, routeConfig, navigationInstruction) {
+      var _this = this;
+
+      this.jobs = [];
+      this.router = navigationInstruction.router;
+      return this.dataRepository.getJobs().then(function (jobs) {
+        console.log(jobs);
+        _this.jobs = jobs;
+      });
+    };
+
+    Jobs.prototype.addJob = function addJob() {
+      this.router.navigateToRoute('addJob');
+    };
+
+    return Jobs;
+  }()) || _class);
 });
 define('resources/index',["exports"], function (exports) {
   "use strict";
@@ -1253,157 +1471,8 @@ define('sideBar/sponsors',['exports', 'aurelia-framework'], function (exports, _
     return Person;
   }(), (_applyDecoratedDescriptor(_class.prototype, 'fullName', [_dec], Object.getOwnPropertyDescriptor(_class.prototype, 'fullName'), _class.prototype)), _class));
 });
-define('common/bootstrap-form-renderer',['exports', 'aurelia-validation'], function (exports, _aureliaValidation) {
-  'use strict';
-
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-  exports.BootstrapFormRenderer = undefined;
-
-  function _classCallCheck(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-
-  var BootstrapFormRenderer = exports.BootstrapFormRenderer = function () {
-    function BootstrapFormRenderer() {
-      _classCallCheck(this, BootstrapFormRenderer);
-    }
-
-    BootstrapFormRenderer.prototype.render = function render(instruction) {
-      for (var _iterator = instruction.unrender, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-        var _ref2;
-
-        if (_isArray) {
-          if (_i >= _iterator.length) break;
-          _ref2 = _iterator[_i++];
-        } else {
-          _i = _iterator.next();
-          if (_i.done) break;
-          _ref2 = _i.value;
-        }
-
-        var _ref5 = _ref2;
-        var result = _ref5.result,
-            elements = _ref5.elements;
-
-        for (var _iterator3 = elements, _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
-          var _ref6;
-
-          if (_isArray3) {
-            if (_i3 >= _iterator3.length) break;
-            _ref6 = _iterator3[_i3++];
-          } else {
-            _i3 = _iterator3.next();
-            if (_i3.done) break;
-            _ref6 = _i3.value;
-          }
-
-          var element = _ref6;
-
-          this.remove(element, result);
-        }
-      }
-
-      for (var _iterator2 = instruction.render, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
-        var _ref4;
-
-        if (_isArray2) {
-          if (_i2 >= _iterator2.length) break;
-          _ref4 = _iterator2[_i2++];
-        } else {
-          _i2 = _iterator2.next();
-          if (_i2.done) break;
-          _ref4 = _i2.value;
-        }
-
-        var _ref7 = _ref4;
-        var result = _ref7.result,
-            elements = _ref7.elements;
-
-        for (var _iterator4 = elements, _isArray4 = Array.isArray(_iterator4), _i4 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator]();;) {
-          var _ref8;
-
-          if (_isArray4) {
-            if (_i4 >= _iterator4.length) break;
-            _ref8 = _iterator4[_i4++];
-          } else {
-            _i4 = _iterator4.next();
-            if (_i4.done) break;
-            _ref8 = _i4.value;
-          }
-
-          var _element = _ref8;
-
-          this.add(_element, result);
-        }
-      }
-    };
-
-    BootstrapFormRenderer.prototype.add = function add(element, result) {
-      if (result.valid) {
-        return;
-      }
-
-      var formGroup = element.closest('.form-group');
-      if (!formGroup) {
-        return;
-      }
-
-      formGroup.classList.add('has-error');
-
-      var message = document.createElement('span');
-      message.className = 'help-block validation-message';
-      message.textContent = result.message;
-      message.id = 'validation-message-' + result.id;
-      formGroup.appendChild(message);
-    };
-
-    BootstrapFormRenderer.prototype.remove = function remove(element, result) {
-      if (result.valid) {
-        return;
-      }
-
-      var formGroup = element.closest('.form-group');
-      if (!formGroup) {
-        return;
-      }
-
-      var message = formGroup.querySelector('#validation-message-' + result.id);
-      if (message) {
-        formGroup.removeChild(message);
-
-        if (formGroup.querySelectorAll('.help-block.validation-message').length === 0) {
-          formGroup.classList.remove('has-error');
-        }
-      }
-    };
-
-    return BootstrapFormRenderer;
-  }();
-});
-define('common/NotificationPayload',["exports"], function (exports) {
-  "use strict";
-
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-
-  function _classCallCheck(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-
-  var NotificationPayload = exports.NotificationPayload = function NotificationPayload(time) {
-    _classCallCheck(this, NotificationPayload);
-
-    this.time = time;
-  };
-});
-define('text!shell.html', ['module'], function(module) { module.exports = "<template><require from=\"bootstrap/css/bootstrap.css\"></require><require from=\"toastr/build/toastr.min.css\"></require><nav class=\"navbar navbar-default\"><div class=\"container\"><div class=\"navbar-header\"><button type=\"button\" class=\"navbar-toggle collapsed\" data-toggle=\"collapse\" data-target=\"#bs-example-navbar-collapse-1\" aria-expanded=\"false\"><span class=\"sr-only\">Toggle navigation</span> <span class=\"icon-bar\"></span> <span class=\"icon-bar\"></span> <span class=\"icon-bar\"></span></button> <a class=\"navbar-brand\" href=\"#\">Aurelia Fundamentals</a></div><div class=\"collapse navbar-collapse\" id=\"bs-example-navbar-collapse-1\"><ul class=\"nav navbar-nav\"><li repeat.for=\"route of router.navigation\" class=\"${route.isActive ? 'active' : ''}\"><a data-toggle=\"collapse\" data-target=\"#bs-example-navbar-collapse-1.in\" href.bind=\"route.href\">${route.title}</a></li></ul><ul class=\"nav navbar-nav navbar-right\"><li><i class=\"fa fa-cog fa-spin fa-3x\" style=\"margin:0 auto\" if.bind=\"router.isNavigating\"></i></li></ul></div></div></nav><div class=\"container\"><div style=\"background:#90ee90\" show.bind=\"notification\" click.delegate=\"clearNotification()\">Notification received: ${notification}</div><div class=\"col-xs-10\"><router-view name=\"mainContent\"></router-view></div><div class=\"col-xs-2\"><router-view name=\"sideBar\"></router-view></div></div></template>"; });
+define('text!shell.html', ['module'], function(module) { module.exports = "<template><require from=\"bootstrap/css/bootstrap.css\"></require><require from=\"toastr/build/toastr.min.css\"></require><require from=\"common/nav-bar\"></require><nav-bar router.bind=\"router\"></nav-bar><div class=\"container\"><div style=\"background:#90ee90\" show.bind=\"notification\" click.delegate=\"clearNotification()\">Notification received: ${notification}</div><div class=\"col-xs-10\"><router-view name=\"mainContent\"></router-view></div><div class=\"col-xs-2\"><router-view name=\"sideBar\"></router-view></div></div></template>"; });
+define('text!common/nav-bar.html', ['module'], function(module) { module.exports = "<template><nav class=\"navbar navbar-default\"><div class=\"container\"><div class=\"navbar-header\"><button type=\"button\" class=\"navbar-toggle collapsed\" data-toggle=\"collapse\" data-target=\"#bs-example-navbar-collapse-1\" aria-expanded=\"false\"><span class=\"sr-only\">Toggle navigation</span> <span class=\"icon-bar\"></span> <span class=\"icon-bar\"></span> <span class=\"icon-bar\"></span></button> <a class=\"navbar-brand\" href=\"#\">Aurelia Fundamentals</a></div><div class=\"collapse navbar-collapse\" id=\"bs-example-navbar-collapse-1\"><ul class=\"nav navbar-nav\"><li repeat.for=\"route of router.navigation\" class=\"${route.isActive ? 'active' : ''}\"><a data-toggle=\"collapse\" data-target=\"#bs-example-navbar-collapse-1.in\" href.bind=\"route.href\">${route.title}</a></li></ul><ul class=\"nav navbar-nav navbar-right\"><li><i class=\"fa fa-cog fa-spin fa-3x\" style=\"margin:0 auto\" if.bind=\"router.isNavigating\"></i></li></ul></div></div></nav></template>"; });
 define('text!discussion/discussion.html', ['module'], function(module) { module.exports = "<template>Discussion input: <input type=\"text\" value.bind=\"discussionInput\"><br><button type=\"button\" click.delegate=\"save()\">Save</button></template>"; });
 define('text!events/EditDialog.html', ['module'], function(module) { module.exports = "<template><ai-dialog><ai-dialog-header><h3>Edit Event</h3></ai-dialog-header><ai-dialog-body><div class=\"form-group\"><label for=\"title\">Title</label><input type=\"text\" value.bind=\"event.title\" class=\"form-control\" id=\"title\" placeholder=\"Title\"></div><div class=\"form-group\"><label for=\"description\">Description</label><br><textarea id=\"description\" name=\"description\" value.bind=\"event.description\" rows=\"4\" cols=\"50\"></textarea></div></ai-dialog-body><ai-dialog-footer><button type=\"button\" class=\"btn btn-primary\" click.delegate=\"save()\">Save</button> <button type=\"button\" class=\"btn btn-default\" click.delegate=\"cancel()\">Cancel</button></ai-dialog-footer></ai-dialog></template>"; });
 define('text!events/event.html', ['module'], function(module) { module.exports = "<template><div class=\"bg-success rbox\"><table><tr><td><a href.bind=\"event.detailUrl\"><h3 textcontent.bind=\"event.title\"></h3></a></td></tr><tr><td><h5>${event.dateTime | dateFormat}</h5></td></tr><tr><td innerhtml.bind=\"event.description | sanitizeHTML\"></td></tr></table><div textcontent.two-way=\"event.description\" contenteditable=\"true\"></div></div></template>"; });
