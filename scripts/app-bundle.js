@@ -442,12 +442,13 @@ define('common/NotificationPayload',["exports"], function (exports) {
     this.time = time;
   };
 });
-define('discussion/discussion',['exports'], function (exports) {
+define('common/speakerImage',['exports', 'aurelia-framework'], function (exports, _aureliaFramework) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
     value: true
   });
+  exports.SpeakerImage = undefined;
 
   function _classCallCheck(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
@@ -455,42 +456,25 @@ define('discussion/discussion',['exports'], function (exports) {
     }
   }
 
-  function getDiscussionInput() {
-    return '';
-  }
+  var _dec, _dec2, _class;
 
-  function cloneObject(obj) {
-    return JSON.parse(JSON.stringify(obj));
-  }
+  var SpeakerImage = exports.SpeakerImage = (_dec = (0, _aureliaFramework.inject)(Element), _dec2 = (0, _aureliaFramework.customAttribute)('speaker-img'), _dec(_class = _dec2(_class = function () {
+    function SpeakerImage(element) {
+      _classCallCheck(this, SpeakerImage);
 
-  var Discussion = exports.Discussion = function () {
-    function Discussion() {
-      _classCallCheck(this, Discussion);
+      this.element = element;
     }
 
-    Discussion.prototype.activate = function activate() {
-      this.discussionInput = getDiscussionInput();
-      this.originalInput = cloneObject(this.discussionInput);
+    SpeakerImage.prototype.valueChanged = function valueChanged(newValue) {
+      this.element.src = 'images/speakers/' + newValue;
     };
 
-    Discussion.prototype.save = function save() {
-      this.originalInput = cloneObject(this.discussionInput);
+    SpeakerImage.prototype.bind = function bind(bindingContext) {
+      this.valueChanged(this.value);
     };
 
-    Discussion.prototype.canDeactivate = function canDeactivate() {
-      if (JSON.stringify(cloneObject(this.discussionInput)) !== JSON.stringify(this.originalInput)) {
-        if (confirm('Unsaved data, are you sure you want to navigate away?')) {
-          return true;
-        } else {
-          return false;
-        }
-      } else {
-        return true;
-      }
-    };
-
-    return Discussion;
-  }();
+    return SpeakerImage;
+  }()) || _class) || _class);
 });
 define('events/EditDialog',['exports', 'aurelia-dialog', 'aurelia-framework'], function (exports, _aureliaDialog, _aureliaFramework) {
   'use strict';
@@ -689,6 +673,56 @@ define('events/past',["exports"], function (exports) {
   var Past = exports.Past = function Past() {
     _classCallCheck(this, Past);
   };
+});
+define('discussion/discussion',['exports'], function (exports) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  function getDiscussionInput() {
+    return '';
+  }
+
+  function cloneObject(obj) {
+    return JSON.parse(JSON.stringify(obj));
+  }
+
+  var Discussion = exports.Discussion = function () {
+    function Discussion() {
+      _classCallCheck(this, Discussion);
+    }
+
+    Discussion.prototype.activate = function activate() {
+      this.discussionInput = getDiscussionInput();
+      this.originalInput = cloneObject(this.discussionInput);
+    };
+
+    Discussion.prototype.save = function save() {
+      this.originalInput = cloneObject(this.discussionInput);
+    };
+
+    Discussion.prototype.canDeactivate = function canDeactivate() {
+      if (JSON.stringify(cloneObject(this.discussionInput)) !== JSON.stringify(this.originalInput)) {
+        if (confirm('Unsaved data, are you sure you want to navigate away?')) {
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        return true;
+      }
+    };
+
+    return Discussion;
+  }();
 });
 define('jobs/addJob',['exports', 'aurelia-framework', 'services/dataRepository', 'aurelia-validation', 'common/bootstrap-form-renderer'], function (exports, _aureliaFramework, _dataRepository, _aureliaValidation, _bootstrapFormRenderer) {
   'use strict';
@@ -1490,7 +1524,7 @@ define('text!common/nav-bar.html', ['module'], function(module) { module.exports
 define('text!discussion/discussion.html', ['module'], function(module) { module.exports = "<template>Discussion input: <input type=\"text\" value.bind=\"discussionInput\"><br><button type=\"button\" click.delegate=\"save()\">Save</button></template>"; });
 define('text!events/EditDialog.html', ['module'], function(module) { module.exports = "<template><ai-dialog><ai-dialog-header><h3>Edit Event</h3></ai-dialog-header><ai-dialog-body><div class=\"form-group\"><label for=\"title\">Title</label><input type=\"text\" value.bind=\"event.title\" class=\"form-control\" id=\"title\" placeholder=\"Title\"></div><div class=\"form-group\"><label for=\"description\">Description</label><br><textarea id=\"description\" name=\"description\" value.bind=\"event.description\" rows=\"4\" cols=\"50\"></textarea></div></ai-dialog-body><ai-dialog-footer><button type=\"button\" class=\"btn btn-primary\" click.delegate=\"save()\">Save</button> <button type=\"button\" class=\"btn btn-default\" click.delegate=\"cancel()\">Cancel</button></ai-dialog-footer></ai-dialog></template>"; });
 define('text!events/event.html', ['module'], function(module) { module.exports = "<template><div class=\"bg-success rbox\"><table><tr><td><a href.bind=\"event.detailUrl\"><h3 textcontent.bind=\"event.title\"></h3></a></td></tr><tr><td><h5>${event.dateTime | dateFormat}</h5></td></tr><tr><td innerhtml.bind=\"event.description | sanitizeHTML\"></td></tr></table><div textcontent.two-way=\"event.description\" contenteditable=\"true\"></div></div></template>"; });
-define('text!events/eventDetail.html', ['module'], function(module) { module.exports = "<template><div class=\"row\"><div class=\"col-md-1\"><img src=\"images/speakers/${event.image}\" style=\"width:100%;max-width:200px\"></div><div class=\"col-md-11\"><h3>${event.title}</h3><h5>${event.dateTime | dateFormat}</h5><button click.delegate=\"editEvent(event)\">Edit</button></div></div><div class=\"row\"><div class=\"col-m-12\">${event.description}</div></div></template>"; });
+define('text!events/eventDetail.html', ['module'], function(module) { module.exports = "<template><require from=\"common/speakerImage\"></require><div class=\"row\"><div class=\"col-md-1\"><img speaker-img=\"${event.image}\" style=\"width:100%;max-width:200px\"></div><div class=\"col-md-11\"><h3>${event.title}</h3><h5>${event.dateTime | dateFormat}</h5><button click.delegate=\"editEvent(event)\">Edit</button></div></div><div class=\"row\"><div class=\"col-m-12\">${event.description}</div></div></template>"; });
 define('text!events/events.html', ['module'], function(module) { module.exports = "<template><style type=\"text/css\">.nav-tabs li a{font-size:20px}</style><ul class=\"nav nav-tabs\"><li repeat.for=\"route of router.navigation\" class=\"${route.isActive ? 'active' : '' }\"><a href.bind=\"route.href\">${route.title}</a></li></ul><router-view></router-view></template>"; });
 define('text!events/eventsList.html', ['module'], function(module) { module.exports = "<template><div repeat.for=\"event of events\"><compose model.bind=\"event\" view=\"./event.html\"></compose></div><button type=\"button\" click.trigger=\"goToDiscussion()\">Go to discussion</button></template>"; });
 define('text!events/past.html', ['module'], function(module) { module.exports = "<template>Past Events</template>"; });
