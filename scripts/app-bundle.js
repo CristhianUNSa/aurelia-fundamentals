@@ -498,7 +498,7 @@ define('resources/index',["exports"], function (exports) {
   exports.configure = configure;
   function configure(config) {}
 });
-define('services/dataRepository',['exports', 'aurelia-framework', './jobsData', 'moment', 'aurelia-http-client'], function (exports, _aureliaFramework, _jobsData, _moment, _aureliaHttpClient) {
+define('services/dataRepository',['exports', 'aurelia-framework', './jobsData', 'moment', 'aurelia-http-client', 'aurelia-fetch-client'], function (exports, _aureliaFramework, _jobsData, _moment, _aureliaHttpClient, _aureliaFetchClient) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
@@ -540,11 +540,12 @@ define('services/dataRepository',['exports', 'aurelia-framework', './jobsData', 
     return results;
   }
 
-  var DataRepository = exports.DataRepository = (_dec = (0, _aureliaFramework.inject)(_aureliaHttpClient.HttpClient, 'apiRoot'), _dec(_class = function () {
-    function DataRepository(httpClient, apiRoot) {
+  var DataRepository = exports.DataRepository = (_dec = (0, _aureliaFramework.inject)(_aureliaHttpClient.HttpClient, _aureliaFetchClient.HttpClient, 'apiRoot'), _dec(_class = function () {
+    function DataRepository(httpClient, httpFetch, apiRoot) {
       _classCallCheck(this, DataRepository);
 
       this.httpClient = httpClient;
+      this.httpFetch = httpFetch;
       this.apiRoot = apiRoot;
     }
 
@@ -614,9 +615,17 @@ define('services/dataRepository',['exports', 'aurelia-framework', './jobsData', 
 
       var promise = new Promise(function (resolve, reject) {
         if (!_this5.jobs) {
-          _this5.jobs = _jobsData.jobsData;
+          _this5.httpFetch.fetch(_this5.apiRoot + 'api/Jobs').then(function (response) {
+            return response.json();
+          }).then(function (data) {
+            _this5.jobs = data;
+            resolve(_this5.jobs);
+          }).catch(function (err) {
+            return reject(err);
+          });
+        } else {
+          resolve(_this5.jobs);
         }
-        resolve(_this5.jobs);
       });
       return promise;
     };
@@ -628,8 +637,17 @@ define('services/dataRepository',['exports', 'aurelia-framework', './jobsData', 
         if (!_this6.jobs) {
           _this6.jobs = [];
         }
-        _this6.jobs.push(job);
-        resolve(job);
+        _this6.httpFetch.fetch(_this6.apiRoot + 'api/Jobs', {
+          method: 'POST',
+          body: (0, _aureliaFetchClient.json)(job)
+        }).then(function (response) {
+          return response.json();
+        }).then(function (data) {
+          _this6.jobs.push(data);
+          resolve(data);
+        }).catch(function (err) {
+          return reject(err);
+        });
       });
       return promise;
     };
