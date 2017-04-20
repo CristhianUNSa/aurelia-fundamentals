@@ -398,16 +398,30 @@ define('common/nav-bar',['exports', 'aurelia-framework'], function (exports, _au
     throw new Error('Decorating class property failed. Please ensure that transform-class-properties is enabled.');
   }
 
-  var _desc, _value, _class, _descriptor;
+  var _dec, _class, _desc, _value, _class2, _descriptor;
 
-  var NavBar = exports.NavBar = (_class = function NavBar() {
-    _classCallCheck(this, NavBar);
+  var NavBar = exports.NavBar = (_dec = (0, _aureliaFramework.customElement)('navigation-bar'), _dec(_class = (_class2 = function () {
+    function NavBar() {
+      _classCallCheck(this, NavBar);
 
-    _initDefineProp(this, 'router', _descriptor, this);
-  }, (_descriptor = _applyDecoratedDescriptor(_class.prototype, 'router', [_aureliaFramework.bindable], {
+      _initDefineProp(this, 'router', _descriptor, this);
+    }
+
+    NavBar.prototype.created = function created(view) {};
+
+    NavBar.prototype.bind = function bind(bidingContext, overrideContext) {};
+
+    NavBar.prototype.unbind = function unbind() {};
+
+    NavBar.prototype.attached = function attached() {};
+
+    NavBar.prototype.detached = function detached() {};
+
+    return NavBar;
+  }(), (_descriptor = _applyDecoratedDescriptor(_class2.prototype, 'router', [_aureliaFramework.bindable], {
     enumerable: true,
     initializer: null
-  })), _class);
+  })), _class2)) || _class);
 });
 define('common/NotificationPayload',["exports"], function (exports) {
   "use strict";
@@ -1471,8 +1485,8 @@ define('sideBar/sponsors',['exports', 'aurelia-framework'], function (exports, _
     return Person;
   }(), (_applyDecoratedDescriptor(_class.prototype, 'fullName', [_dec], Object.getOwnPropertyDescriptor(_class.prototype, 'fullName'), _class.prototype)), _class));
 });
-define('text!shell.html', ['module'], function(module) { module.exports = "<template><require from=\"bootstrap/css/bootstrap.css\"></require><require from=\"toastr/build/toastr.min.css\"></require><require from=\"common/nav-bar\"></require><nav-bar router.bind=\"router\"></nav-bar><div class=\"container\"><div style=\"background:#90ee90\" show.bind=\"notification\" click.delegate=\"clearNotification()\">Notification received: ${notification}</div><div class=\"col-xs-10\"><router-view name=\"mainContent\"></router-view></div><div class=\"col-xs-2\"><router-view name=\"sideBar\"></router-view></div></div></template>"; });
-define('text!common/nav-bar.html', ['module'], function(module) { module.exports = "<template><nav class=\"navbar navbar-default\"><div class=\"container\"><div class=\"navbar-header\"><button type=\"button\" class=\"navbar-toggle collapsed\" data-toggle=\"collapse\" data-target=\"#bs-example-navbar-collapse-1\" aria-expanded=\"false\"><span class=\"sr-only\">Toggle navigation</span> <span class=\"icon-bar\"></span> <span class=\"icon-bar\"></span> <span class=\"icon-bar\"></span></button> <a class=\"navbar-brand\" href=\"#\">Aurelia Fundamentals</a></div><div class=\"collapse navbar-collapse\" id=\"bs-example-navbar-collapse-1\"><ul class=\"nav navbar-nav\"><li repeat.for=\"route of router.navigation\" class=\"${route.isActive ? 'active' : ''}\"><a data-toggle=\"collapse\" data-target=\"#bs-example-navbar-collapse-1.in\" href.bind=\"route.href\">${route.title}</a></li></ul><ul class=\"nav navbar-nav navbar-right\"><li><i class=\"fa fa-cog fa-spin fa-3x\" style=\"margin:0 auto\" if.bind=\"router.isNavigating\"></i></li></ul></div></div></nav></template>"; });
+define('text!shell.html', ['module'], function(module) { module.exports = "<template><require from=\"bootstrap/css/bootstrap.css\"></require><require from=\"toastr/build/toastr.min.css\"></require><require from=\"common/nav-bar\"></require><navigation-bar router.bind=\"router\"><template replace-part=\"logo\"><div>Aurelia Fundamentals</div></template></navigation-bar><div class=\"container\"><div style=\"background:#90ee90\" show.bind=\"notification\" click.delegate=\"clearNotification()\">Notification received: ${notification}</div><div class=\"col-xs-10\"><router-view name=\"mainContent\"></router-view></div><div class=\"col-xs-2\"><router-view name=\"sideBar\"></router-view></div></div></template>"; });
+define('text!common/nav-bar.html', ['module'], function(module) { module.exports = "<template><nav class=\"navbar navbar-default\"><div class=\"container\"><div class=\"navbar-header\"><button type=\"button\" class=\"navbar-toggle collapsed\" data-toggle=\"collapse\" data-target=\"#bs-example-navbar-collapse-1\" aria-expanded=\"false\"><span class=\"sr-only\">Toggle navigation</span> <span class=\"icon-bar\"></span> <span class=\"icon-bar\"></span> <span class=\"icon-bar\"></span></button> <a class=\"navbar-brand\" href=\"#\"><template replaceable part=\"logo\"></template></a></div><div class=\"collapse navbar-collapse\" id=\"bs-example-navbar-collapse-1\"><ul class=\"nav navbar-nav\"><li repeat.for=\"route of router.navigation\" class=\"${route.isActive ? 'active' : ''}\"><a data-toggle=\"collapse\" data-target=\"#bs-example-navbar-collapse-1.in\" href.bind=\"route.href\">${route.title}</a></li></ul><ul class=\"nav navbar-nav navbar-right\"><li><i class=\"fa fa-cog fa-spin fa-3x\" style=\"margin:0 auto\" if.bind=\"router.isNavigating\"></i></li></ul></div></div></nav></template>"; });
 define('text!discussion/discussion.html', ['module'], function(module) { module.exports = "<template>Discussion input: <input type=\"text\" value.bind=\"discussionInput\"><br><button type=\"button\" click.delegate=\"save()\">Save</button></template>"; });
 define('text!events/EditDialog.html', ['module'], function(module) { module.exports = "<template><ai-dialog><ai-dialog-header><h3>Edit Event</h3></ai-dialog-header><ai-dialog-body><div class=\"form-group\"><label for=\"title\">Title</label><input type=\"text\" value.bind=\"event.title\" class=\"form-control\" id=\"title\" placeholder=\"Title\"></div><div class=\"form-group\"><label for=\"description\">Description</label><br><textarea id=\"description\" name=\"description\" value.bind=\"event.description\" rows=\"4\" cols=\"50\"></textarea></div></ai-dialog-body><ai-dialog-footer><button type=\"button\" class=\"btn btn-primary\" click.delegate=\"save()\">Save</button> <button type=\"button\" class=\"btn btn-default\" click.delegate=\"cancel()\">Cancel</button></ai-dialog-footer></ai-dialog></template>"; });
 define('text!events/event.html', ['module'], function(module) { module.exports = "<template><div class=\"bg-success rbox\"><table><tr><td><a href.bind=\"event.detailUrl\"><h3 textcontent.bind=\"event.title\"></h3></a></td></tr><tr><td><h5>${event.dateTime | dateFormat}</h5></td></tr><tr><td innerhtml.bind=\"event.description | sanitizeHTML\"></td></tr></table><div textcontent.two-way=\"event.description\" contenteditable=\"true\"></div></div></template>"; });

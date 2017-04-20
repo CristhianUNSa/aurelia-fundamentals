@@ -2,7 +2,11 @@
   <require from="bootstrap/css/bootstrap.css"></require>
   <require from="toastr/build/toastr.min.css"></require>
   <require from="common/nav-bar"></require>
-  <nav-bar router.bind="router"></nav-bar>
+  <navigation-bar router.bind="router">
+    <template replace-part="logo">
+      <div>Aurelia Fundamentals</div>
+    </template>
+  </navigation-bar>
   <div class="container">
     <div style="background: lightgreen" show.bind="notification" click.delegate="clearNotification()">
       Notification received: ${notification}
