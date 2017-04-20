@@ -972,7 +972,6 @@ define('services/dataRepository',['exports', 'aurelia-framework', './jobsData', 
             _this2.events.forEach(function (item) {
               if (item.speaker.toUpperCase() === 'BRIAN NOYES') {
                 item.isMvp = true;
-                console.log('isMvp');
               }
             }, _this2);
             resolve(filterAndFormat(pastOrFuture, _this2.events));
@@ -1583,6 +1582,49 @@ define('sideBar/sponsors',['exports', 'aurelia-framework'], function (exports, _
     return Person;
   }(), (_applyDecoratedDescriptor(_class.prototype, 'fullName', [_dec], Object.getOwnPropertyDescriptor(_class.prototype, 'fullName'), _class.prototype)), _class));
 });
+define('common/itemsControl2',['exports', 'aurelia-framework'], function (exports, _aureliaFramework) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.ItemsControl2 = undefined;
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var _dec, _dec2, _class;
+
+  var ItemsControl2 = exports.ItemsControl2 = (_dec = (0, _aureliaFramework.customAttribute)('items-control2'), _dec2 = (0, _aureliaFramework.inject)(_aureliaFramework.BoundViewFactory, _aureliaFramework.ViewSlot), _dec(_class = (0, _aureliaFramework.templateController)(_class = _dec2(_class = function () {
+    function ItemsControl2(boundViewFactory, viewSlot) {
+      _classCallCheck(this, ItemsControl2);
+
+      this.viewFactory = boundViewFactory;
+      this.viewSlot = viewSlot;
+      this.viewInstances = [];
+    }
+
+    ItemsControl2.prototype.valueChanged = function valueChanged(newValue) {
+      var _this = this;
+
+      this.viewInstances.forEach(function (view) {
+        _this.viewSlot.remove(view);
+        view.unbind();
+      });
+      this.viewInstances = [];
+      newValue.forEach(function (value) {
+        var view = _this.viewFactory.create();
+        view.bind(value);
+        _this.viewSlot.add(view);
+      });
+    };
+
+    return ItemsControl2;
+  }()) || _class) || _class) || _class);
+});
 define('text!shell.html', ['module'], function(module) { module.exports = "<template><require from=\"bootstrap/css/bootstrap.css\"></require><require from=\"toastr/build/toastr.min.css\"></require><require from=\"common/nav-bar\"></require><navigation-bar router.bind=\"router\"><template replace-part=\"logo\"><div>Aurelia Fundamentals</div></template></navigation-bar><div class=\"container\"><div style=\"background:#90ee90\" show.bind=\"notification\" click.delegate=\"clearNotification()\">Notification received: ${notification}</div><div class=\"col-xs-10\"><router-view name=\"mainContent\"></router-view></div><div class=\"col-xs-2\"><router-view name=\"sideBar\"></router-view></div></div></template>"; });
 define('text!common/nav-bar.html', ['module'], function(module) { module.exports = "<template><nav class=\"navbar navbar-default\"><div class=\"container\"><div class=\"navbar-header\"><button type=\"button\" class=\"navbar-toggle collapsed\" data-toggle=\"collapse\" data-target=\"#bs-example-navbar-collapse-1\" aria-expanded=\"false\"><span class=\"sr-only\">Toggle navigation</span> <span class=\"icon-bar\"></span> <span class=\"icon-bar\"></span> <span class=\"icon-bar\"></span></button> <a class=\"navbar-brand\" href=\"#\"><template replaceable part=\"logo\"></template></a></div><div class=\"collapse navbar-collapse\" id=\"bs-example-navbar-collapse-1\"><ul class=\"nav navbar-nav\"><li repeat.for=\"route of router.navigation\" class=\"${route.isActive ? 'active' : ''}\"><a data-toggle=\"collapse\" data-target=\"#bs-example-navbar-collapse-1.in\" href.bind=\"route.href\">${route.title}</a></li></ul><ul class=\"nav navbar-nav navbar-right\"><li><i class=\"fa fa-cog fa-spin fa-3x\" style=\"margin:0 auto\" if.bind=\"router.isNavigating\"></i></li></ul></div></div></nav></template>"; });
 define('text!discussion/discussion.html', ['module'], function(module) { module.exports = "<template>Discussion input: <input type=\"text\" value.bind=\"discussionInput\"><br><button type=\"button\" click.delegate=\"save()\">Save</button></template>"; });
@@ -1593,7 +1635,7 @@ define('text!events/events.html', ['module'], function(module) { module.exports 
 define('text!events/eventsList.html', ['module'], function(module) { module.exports = "<template><div repeat.for=\"event of events\"><compose model.bind=\"event\" view=\"./event.html\"></compose></div><button type=\"button\" click.trigger=\"goToDiscussion()\">Go to discussion</button></template>"; });
 define('text!events/past.html', ['module'], function(module) { module.exports = "<template>Past Events</template>"; });
 define('text!jobs/addJob.html', ['module'], function(module) { module.exports = "<template><form submit.delegate=\"save()\"><div class=\"form-group\"><label for=\"title\">Title</label><input type=\"text\" value.bind=\"job.title & validate\" class=\"form-control\" id=\"title\" placeholder=\"Title\"></div><div class=\"form-group\"><label for=\"description\">Description</label><textarea value.bind=\"job.description\" class=\"form-control\" id=\"description\" placeholder=\"Description\" rows=\"5\"></textarea></div><div class=\"form-group\"><label for=\"needDate\">Need Date</label><input type=\"text\" id=\"needDate\" value.bind=\"job.needDate | dateFormat : 'MM/YYYY' & updateTrigger:'blur'\" placeholder=\"Need Date\"></div><div class=\"form-group\"><label for=\"jobType\">Job Type:</label><label repeat.for=\"jobType of jobTypes\"><input type=\"radio\" name=\"jobType\" value.bind=\"jobType\" checked.bind=\"$parent.job.jobType\"> ${jobType}</label></div><div class=\"form-group\"><label>Job Skills:</label><label repeat.for=\"jobSkill of jobSkills\"><input type=\"checkbox\" value.bind=\"jobSkill\" checked.bind=\"$parent.job.jobSkills\"> ${jobSkill}</label></div><div class=\"form-group\"><label for=\"city\">City</label><input type=\"text\" id=\"city\" value.bind=\"job.location.city\" placeholder=\"City\"></div><div class=\"form-group\"><label for=\"state\">State</label><select id=\"state\" value.bind=\"job.location.state\"><option>Select State</option><option repeat.for=\"state of states\" model.bind=\"state.abbreviation\">${state.name} (${state.abbreviation})</option></select></div><button type=\"submit\" class=\"btn btn-primary\">Save</button><ul if.bind=\"controller.errors\"><li repeat.for=\"error of controller.errors\" style=\"color:red\">${error.message}</li></ul></form></template>"; });
-define('text!jobs/jobs.html', ['module'], function(module) { module.exports = "<template><h3>Job Listings</h3><button type=\"button\" click.delegate=\"addJob()\"><img src=\"images/Add-New.png\"></button><table class=\"table table-striped\"><thead><tr><th>Title</th><th>Need Date</th><th>Location</th><th>Technologies</th></tr></thead><tbody><tr repeat.for=\"job of jobs\"><td>${job.title}</td><td>${job.needDate | dateFormat : 'MM/YYYY'}</td><td>${job.location.city},${job.location.state}</td><td>${job.jobSkills.join(', ')}</td></tr></tbody></table></template>"; });
+define('text!jobs/jobs.html', ['module'], function(module) { module.exports = "<template><require from=\"common/itemsControl2\"></require><div items-control2.bind=\"jobs\"><div class=\"rbox\"><h2>${title}</h2><div>${description}</div></div></div><h3>Job Listings</h3><button type=\"button\" click.delegate=\"addJob()\"><img src=\"images/Add-New.png\"></button><table class=\"table table-striped\"><thead><tr><th>Title</th><th>Need Date</th><th>Location</th><th>Technologies</th></tr></thead><tbody><tr repeat.for=\"job of jobs\"><td>${job.title}</td><td>${job.needDate | dateFormat : 'MM/YYYY'}</td><td>${job.location.city},${job.location.state}</td><td>${job.jobSkills.join(', ')}</td></tr></tbody></table></template>"; });
 define('text!sideBar/ads.html', ['module'], function(module) { module.exports = "<template>Ads</template>"; });
 define('text!sideBar/sponsors.html', ['module'], function(module) { module.exports = "<template><div textcontent.one-way=\"message\"></div><button type=\"button\" click.trigger=\"doSomething(message, $event)\">Click me</button> <input type=\"text\" ref=\"input1\" placeholder=\"Search with debounce 200\"><div style.bind=\"styleString\">${input1.value & debounce: 200}</div><p style.bind=\"styleObject\" repeat.for=\"[key, value] of mapCollection\">${key} - ${value}</p><input type=\"text\" value.bind=\"person.firstName\"> <input type=\"text\" value.bind=\"person.lastName\"> ${person.fullName}</template>"; });
 //# sourceMappingURL=app-bundle.js.map

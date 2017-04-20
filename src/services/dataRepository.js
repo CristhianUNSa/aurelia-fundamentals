@@ -50,7 +50,6 @@ export class DataRepository {
           this.events.forEach(function(item) {
             if (item.speaker.toUpperCase() === 'BRIAN NOYES' ) {
               item.isMvp = true;
-              console.log('isMvp');
             }
           }, this);
           resolve(filterAndFormat(pastOrFuture, this.events));
