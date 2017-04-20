@@ -1,7 +1,21 @@
 import toastr from 'toastr';
+import {EventAggregator} from 'aurelia-event-aggregator';
+import {NotificationPayload} from 'common/NotificationPayload';
+import {inject} from 'aurelia-framework';
 
+@inject(EventAggregator)
 export class App {
-  constructor() { }
+  constructor(eventAggregator) { 
+    this.eventAggregator = eventAggregator;
+    this.eventAggregator.subscribe(NotificationPayload, payload => {
+      this.notification = payload.time;
+    });
+  }
+
+  clearNotification() {
+    this.notification = null;
+  }
+
   configureRouter(config, router) {
     this.router = router;
     config.title = 'Aurelia Fundamentals';
